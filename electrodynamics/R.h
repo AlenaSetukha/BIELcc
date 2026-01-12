@@ -1,0 +1,120 @@
+#ifndef _R_H_
+#define _R_H_
+
+#include <iostream>
+#include <complex>
+#include <variant>
+
+#include "num_param.h"
+#include "kernel_param.h"
+#include "integral_param.h"
+#include "kernel_lib.h"
+#include "element_geom.h"
+#include "integral_universal.h"
+#include "constants.h"
+
+
+namespace bielcc {
+
+//===========================================================
+//------------Operator R = Rot [surf integral]---------------
+//---------in the near zone using smoothing kernel-----------
+//===========================================================
+/**
+    * Fully numerical calculation of the near-field integral
+    * operator
+    *        R[cell, j_vec](x) = rot surf_int(j_vec, F) =
+    *               = -surf_int( j_vec x grad_x F)
+    * where F = eikr/r.
+    * Integral is calculated with smoothing.
+    * 
+    * Calculation at fixed point x. Rectangle formula, 
+    * integration over dy.
+    * Note: num_param.rs - the integral smoothing radius
+    * relative to the second-level cell size (~0.5 - 2)
+*/
+
+/**
+    * @brief Near-field integral operator R[cell, j_vec](x) (smoothing)
+    * @param j argument vector [3]
+    * @param x calc point
+    * @param cell Integration cell [4 / 3][3]
+    * @param num_param Numerical parameters for integration
+    * @param k Wave number for integrand
+    * @param res Result
+    * @note Operator R[] calculated with smoothing kernel
+*/
+template<typename JType, typename KType, size_t CellPoints>
+void R_Rot_Smooth(const JType* j, const double* x, const double (&cell)[CellPoints][3],
+                    const NumParam& num_param, const KType k, std::complex<double>* res)
+{
+    std::complex<double> cur_res3[3]{};
+
+    KernelParam<KType> param;
+    param.smoothR = num_param.rs * get_diam(cell) / num_param.n_start;
+    param.k = k;
+
+    IntegralParam int_parGradF(3, num_param.n_start, num_param.p_max, num_param.eps);
+
+    IntegralUniversalPnt(x, cell, F_GradSimplePot_H, param, int_parGradF, cur_res3);
+    vec_prod(cur_res3, j, res);
+    res[0] /= (4. * M_PI), res[1] /= (4. * M_PI), res[2] /= (4. * M_PI);
+}
+
+
+
+//===========================================================
+//------------Operator R = Rot [surf integral]---------------
+//----------------in the collocation points------------------
+//===========================================================
+/**
+    * Fully numerical calculation of the near-field integral
+    * operator
+    *        R[cell, j_vec](x) = rot surf_int(j_vec, F) =
+    *               = -surf_int( j_vec x grad_x F)
+    * where F = eikr/r.
+    * If x is cell center: R[] = 0
+    * Else: Integral is calculated with smoothing.
+    * 
+    * Calculation at fixed point x. Rectangle formula, 
+    * integration over dy.
+    * Note: num_param.rs - the integral smoothing radius
+    * relative to the second-level cell size (~0.5 - 2)
+*/
+
+
+
+/**
+    * @brief Integral operator R[cell, j_vec](x) only in colloc points. No smooth.
+    * @param j argument vector [3]
+    * @param x collocation point
+    * @param cell Integration cell [4 / 3][3]
+    * @param num_param Numerical parameters for integration
+    * @param k Wave number for integrand
+    * @param res Result
+    * @note Operator R[] calculated in collocation points.
+*/
+template<typename JType, typename KType, size_t CellPoints>
+void R_Rot_Colloc(const JType* j, const double* x, const double (&cell)[CellPoints][3],
+                   const NumParam& num_param, const KType k,  std::complex<double>* res)
+{
+    double y[3];
+    get_center_mass(cell, y);
+    if (dist(x, y) < Tolerance_Constants::MACHINE_ZERO) { 
+        // i == j
+        res[0] = 0., res[1] = 0., res[2] = 0.;
+    } else {
+        std::complex<double> cur_res3[3]{};
+        KernelParam<KType> param;
+        param.smoothR = Tolerance_Constants::MACHINE_ZERO;
+        param.k = k;
+        
+        IntegralParam int_parGradF(3, num_param.n_start, num_param.p_max, num_param.eps);
+
+        IntegralUniversalPnt(x, cell, F_GradSimplePot_H, param, int_parGradF, cur_res3);
+        vec_prod(cur_res3, j, res);
+        res[0] /= (4. * M_PI), res[1] /= (4. * M_PI), res[2] /= (4. * M_PI);
+    }
+}
+}       // namespace bielcc
+#endif  // _R_H_

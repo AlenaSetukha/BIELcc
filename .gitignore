@@ -2,3 +2,15 @@
 *.o
 build
 .*
+parsers/
+extern/yaml-cpp
+em_project/
+examples/parsing/
+examples/field/main0*
+electrodynamics/get_right_side*
+electrodynamics/block*
+electrodynamics/get_j*
+electrodynamics/get_matrix*
+electrodynamics/get_field_one_point.h
+electrodynamics/solve.h
+create_vtk_body.cpp
