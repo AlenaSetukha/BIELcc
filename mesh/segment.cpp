@@ -56,6 +56,7 @@ void Segment::SetCoords(const double (&_ACoords)[3], const double (&_BCoords)[3]
     }
 }
 
+
 void Segment::GetVertCoord(double (&_ACoords)[3], double (&_BCoords)[3]) const {
     for (int i = 0; i < 3; i++) {
         _ACoords[i] = ACoords[i];

@@ -42,6 +42,9 @@ struct Segment {
 
     void GetVertIndx(int (&vi)[2]) const {vi[0] = nA;
                                           vi[1] = nB;}
+    int GetStartIndx() const {return nA;}
+    int GetEndIndx() const {return nB;}
+
     void GetVertCoord(double (&_ACoords)[3], double (&_BCoords)[3]) const;
 };
 

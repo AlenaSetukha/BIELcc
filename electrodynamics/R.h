@@ -10,8 +10,8 @@
 #include "integral_param.h"
 #include "kernel_lib.h"
 #include "element_geom.h"
+#include "tolerance_constants.h"
 #include "integral_universal.h"
-#include "constants.h"
 
 
 namespace bielcc {

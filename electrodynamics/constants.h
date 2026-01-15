@@ -14,12 +14,6 @@ namespace ED_Constants {
     constexpr int c_vacuum = 299792458; // м/с
 }
 
-namespace Tolerance_Constants {
-    const double MACHINE_ZERO = std::numeric_limits<double>::epsilon();
-    const double POINT_TOLERANCE = 1e-6;
-    const double POINT_TOLERANCE_SQ = POINT_TOLERANCE * POINT_TOLERANCE;
-}
-
 namespace Calculation_Constants {
     const double MACHINE_ZERO = std::numeric_limits<double>::epsilon();
     const double ANALYTIC_CALC_DIST = 3.0;
@@ -30,8 +24,5 @@ namespace Calculation_Constants {
     const int PMAX_SEG_SPLIT = 10;  // 2^{PMAX}
     const double INTEGRAL_ACCURACY = 1e-6;
 }
-
-
-
 }       // namespace bielcc
 #endif  // _EM_FIELD_CONSTANTS_H

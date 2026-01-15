@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #include "point.h"
-#include "constants.h"
+#include "tolerance_constants.h"
 
 namespace bielcc {
 

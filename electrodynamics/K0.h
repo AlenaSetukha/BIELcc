@@ -7,8 +7,8 @@
 #include "kernel_param.h"
 #include "integral_param.h"
 #include "element_geom.h"
+#include "tolerance_constants.h"
 #include "integral_universal_seg.h"
-#include "constants.h"
 
 constexpr static const int _DIM_MAX_SEG = 3;
 

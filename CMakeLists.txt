@@ -35,15 +35,13 @@ endif()
 
 
 
-include_directories(electrodynamics)
-include_directories(em_project)
 include_directories(geometry)
-include_directories(integrators)
 include_directories(io)
 include_directories(mesh)
-include_directories(parsers)
+include_directories(extensions/mesh_add/)
 
-include_directories(extern/yaml-cpp/include)
+
+###include_directories(extern/yaml-cpp/include)
 
 
 
@@ -52,24 +50,14 @@ add_subdirectory(extern/yaml-cpp)
 
 
 set(SOURCE
-    electrodynamics/currents.cpp
-    electrodynamics/get_j.cpp
-    electrodynamics/material.cpp
-    electrodynamics/num_param.cpp
-    electrodynamics/radiation_source.cpp
-    em_project/project.cpp
     geometry/element_geom.cpp
-    integrators/integral_param.cpp
-    integrators/integrals_analytic.cpp
-    io/io_aereco.cpp
-    io/io_vtk.cpp
     mesh/cell.cpp
     mesh/point.cpp
     mesh/segment.cpp
-    parsers/num_param_parser.cpp
-    parsers/parse_refr_index.cpp
-    parsers/pp_parser.cpp
-    parsers/project_parser.cpp)
+    mesh/surf_mesh.cpp
+    extensions/mesh_add/edges_surf_mesh.cpp
+    extensions/mesh_add/nodes_surf_mesh.cpp
+    extensions/mesh_add/make_geodat.cpp)
 
 add_library(pcac_lib STATIC ${SOURCE})
 
@@ -78,7 +66,7 @@ add_library(pcac_lib STATIC ${SOURCE})
 #add_executable(test_PCAC ../examples/mesh/mesh_vtk_test_main0.cpp)
 ###add_executable(test_PCAC ../examples/parsing/main_parsing_test.cpp)
 ###add_executable(test_PCAC ../examples/ED_Operators/main_R.cpp)
-add_executable(test_PCAC ../examples/field/main_ideal.cpp)
+add_executable(test_PCAC ../extensions/testing/mesh_test/grey_blue_grid.cpp)
 
 
 if(OPENMP_FOUND)

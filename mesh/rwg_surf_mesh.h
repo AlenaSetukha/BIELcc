@@ -61,14 +61,12 @@ namespace bielcc {
   */
 template<typename CellType>
 class RwgSurfMesh: public SurfMesh<CellType> {
-private:
-    static constexpr std::size_t _NVertex = (std::is_same<CellType, CellQuad>::value) ? 4 : 3;
-
+protected:
     int _n_points;
     std::vector<Point> _points;
     std::vector<int> _point_num_cells;
     std::vector<std::vector<int>> _point_cells;
-    std::vector<std::array<int, _NVertex>> _cell_points;
+    std::vector<std::array<int, SurfMesh<CellType>::_NVertex>> _cell_points;
 
     
     int _n_edges;
@@ -76,10 +74,10 @@ private:
     std::vector<int> _edge_num_cells;
     std::vector<std::vector<int>> _edge_cells;
     std::vector<Point> _edge_mid, _edge_ort;
-    std::vector<std::array<int, _NVertex>> _cell_edges;
+    std::vector<std::array<int, SurfMesh<CellType>::_NVertex>> _cell_edges;
     // Важное: в случае псевдочетырехугольной ячейки(2 вершины совпадают),
     //       edge_dir_indx[j][k] = 0, а frm_edges[j][k] = -5 
-    std::vector<std::array<int, _NVertex>> _cell_edge_dirIndex;
+    std::vector<std::array<int, SurfMesh<CellType>::_NVertex>> _cell_edge_dirIndex;
     std::vector<std::vector<std::vector<int>>> _cell_nghb_by_edge;
 
     void RwgSurfMeshFill();
@@ -88,7 +86,9 @@ private:
     void FillNeighbors();
 
 public:
-    RwgSurfMesh(const RwgSurfMesh<CellType>& rwg_obj): _n_points(rwg_obj._n_points),
+    RwgSurfMesh() = default;
+    RwgSurfMesh(const RwgSurfMesh<CellType>& rwg_obj): SurfMesh<CellType>(rwg_obj),
+                        _n_points(rwg_obj._n_points),
                         _points(rwg_obj._points), _point_num_cells(rwg_obj._point_num_cells),
                         _point_cells(rwg_obj._point_cells), _cell_points(rwg_obj._cell_points),
                         _n_edges(rwg_obj._n_edges), _edges(rwg_obj._edges),
@@ -100,7 +100,7 @@ public:
                         _cell_nghb_by_edge(rwg_obj._cell_nghb_by_edge) {}
 
     RwgSurfMesh(const SurfMesh<CellType>& mesh_obj): SurfMesh<CellType>(mesh_obj)
-                                                        {this->RwgSurfMeshFill();};
+                                                       {this->RwgSurfMeshFill();};
     ~RwgSurfMesh() = default;
 
 
@@ -110,17 +110,33 @@ public:
 
 
 
-    const std::vector<Point>& GetPoints() const {return _points;};
-    const std::vector<int>& GetPointNumCells() const {return _point_num_cells;};
-    const std::vector<std::vector<int>>& GetPointCell() const {return _point_cells;};
-    const std::vector<std::array<int, _NVertex>>& GetCellPoints() const {return _cell_points;};
 
-    const std::vector<Segment>& GetEdges() const {return _edges;};
-    const std::vector<int>& GetEdgeNumCells() const {return _edge_num_cells;};
-    const std::vector<std::vector<int>>& GetEdgeCells() const {return _edge_cells;};
-    const std::vector<Point>& GetEdgeMid() const {return _edge_mid;};
-    const std::vector<Point>& GetEdgeOrt() const {return _edge_ort;};
-    const std::vector<std::array<int, _NVertex>>& GetCellEdges() const {return _cell_edges;};
+    const std::vector<Point>& GetPoints() const {return _points;};
+    const Point& GetPoint(int i) const {return _points[i];}
+
+    int GetPointNumCells(int i) const {return _point_num_cells[i];};
+
+    int GetPointCells(int i, int j) const {return _point_cells[i][j];};
+
+    const std::vector<std::array<int, SurfMesh<CellType>::_NVertex>>& GetCellPoints() const {return _cell_points;};
+    const std::array<int, SurfMesh<CellType>::_NVertex>& GetCellPoints(int i) const {return _cell_points[i];}
+
+    const std::vector<Segment>& GetEdges() const {return _edges;}
+    const Segment& GetEdge(int i) const {return _edges[i];}
+
+    int GetEdgeNumCells(int i) const {return _edge_num_cells[i];}
+
+    const std::vector<std::vector<int>>& GetEdgeCells() const {return _edge_cells;}
+    int GetEdgeCell(int i, int j) const {return _edge_cells[i][j];}
+
+    const std::vector<Point>& GetEdgeMid() const {return _edge_mid;}
+    const Point& GetEdgeMid(int i) const {return _edge_mid[i];}
+
+    const std::vector<Point>& GetEdgeOrt() const {return _edge_ort;}
+    const Point& GetEdgeOrt(int i) const {return _edge_ort[i];} 
+
+    const std::vector<std::array<int, SurfMesh<CellType>::_NVertex>>& GetCellEdges() const {return _cell_edges;}
+    int GetCellEdge(int i, int j) const {return _cell_edges[i][j];}
 };
 
 
@@ -142,7 +158,7 @@ void RwgSurfMesh<CellType>::FillUniquePoints()
     //------Forming unique points======
     //=================================
     for (const auto& cell: this->_cell_list) {
-        for (int i = 0; i < _NVertex; ++i) {
+        for (int i = 0; i < this->_NVertex; ++i) {
             _points.push_back(Point(cell.GetVertex(i)));
         }
     }
@@ -160,8 +176,8 @@ void RwgSurfMesh<CellType>::FillUniquePoints()
     //=================================
     _point_num_cells.resize(_n_points);
     for (const auto& cell: this->_cell_list) {
-        std::array<int, _NVertex> vertex;
-        for (int i = 0; i < _NVertex; ++i) {
+        std::array<int, this->_NVertex> vertex;
+        for (int i = 0; i < this->_NVertex; ++i) {
             auto it = std::find(_points.begin(), _points.end(), Point(cell.GetVertex(i)));
             int pnt_N = std::distance(_points.begin(), it);
             vertex[i] = pnt_N;
@@ -204,9 +220,9 @@ void RwgSurfMesh<CellType>::FillUniqueEdges()
     //------Forming unique Edges======
     //=================================
     for (int i = 0; i < this->_cell_list.size(); i++) {
-        for (int j = 0; j < _NVertex; j++) {
+        for (int j = 0; j < this->_NVertex; j++) {
             int NA = _cell_points[i][j];
-            int Next = (j == (_NVertex - 1)) ? 0 : j + 1;
+            int Next = (j == (this->_NVertex - 1)) ? 0 : j + 1;
             int NB = _cell_points[i][Next];
             if (NA < NB) {
                 _edges.push_back(Segment(NA, NB));
@@ -232,10 +248,10 @@ void RwgSurfMesh<CellType>::FillUniqueEdges()
     _cell_edge_dirIndex.resize(this->_num_frm);
 
     for (int i = 0; i < this->_cell_list.size(); i++) {
-        std::array<int, _NVertex> edgesNums;
-        for (int j = 0; j < _NVertex; j++) {
+        std::array<int, this->_NVertex> edgesNums;
+        for (int j = 0; j < this->_NVertex; j++) {
             int NA = _cell_points[i][j];
-            int Next = (j == (_NVertex - 1)) ? 0 : j + 1;
+            int Next = (j == (this->_NVertex - 1)) ? 0 : j + 1;
             int NB = _cell_points[i][Next];
             if (NA == NB) {
                 // Pseudo-edge
@@ -292,8 +308,8 @@ void RwgSurfMesh<CellType>::FillNeighbors()
 {
     _cell_nghb_by_edge.resize(this->_num_frm);
     for (int i = 0; i < this->_num_frm; i++) {
-        _cell_nghb_by_edge[i].resize(_NVertex);
-        for (int j = 0; j < _NVertex; j++) {
+        _cell_nghb_by_edge[i].resize(this->_NVertex);
+        for (int j = 0; j < this->_NVertex; j++) {
             int edgeN = _cell_edges[i][j];
             if (edgeN > 0) {
                 std::vector<int> cells_numbers = _edge_cells[edgeN];
