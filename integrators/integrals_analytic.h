@@ -13,6 +13,7 @@
 #include "integral_universal.h"
 #include "kernel_lib.h"
 #include "element_geom.h"
+#include "tolerance_constants.h"
 
 namespace bielcc {
 
@@ -144,7 +145,7 @@ std::complex<double> IntegralSurf_SimplePot_H_HS(const double (&cell)[CellPoints
 
     KernelParam<KType> param;
     param.k = k_wave;
-    param.smoothR = Calculation_Constants::MACHINE_ZERO;
+    param.smoothR = Tolerance_Constants::MACHINE_ZERO;
 
     double calc_dist = analyticR_r * get_diam(cell);
     double r = dist(x, y);
@@ -196,7 +197,7 @@ void IntegralSeg_GradSimplePot_H_HS(const double* A, const double* B,
 {
     KernelParam<KType> param;
     param.k = k_wave;
-    param.smoothR = Calculation_Constants::MACHINE_ZERO;
+    param.smoothR = Tolerance_Constants::MACHINE_ZERO;
 
     double y[3] = {(B[0] + A[0]) / 2.,
                    (B[1] + A[1]) / 2.,

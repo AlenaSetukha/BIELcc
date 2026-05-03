@@ -5,47 +5,6 @@
 
 
 namespace bielcc {
-
-CellQuad::CellQuad(const CellQuad& obj) {
-    for (int i = 0; i < 4; i++) {
-        _cell[i][0] = obj._cell[i][0];
-        _cell[i][1] = obj._cell[i][1];
-        _cell[i][2] = obj._cell[i][2];
-    }
-    for (int i = 0; i < 3; i++) {
-        _tau[0][i] = obj._tau[0][i], _tau[1][i] =  obj._tau[1][i];
-        _rkt[i] = obj._rkt[i];
-        _norm[i] = obj._norm[i];
-    }
-    _s = obj._s;
-}
-
-
-
-CellQuad& CellQuad::operator=(const CellQuad& obj) {
-    if (this == &obj) return *this;
-    for (int i = 0; i < 4; i++) {
-        _cell[i][0] = obj._cell[i][0];
-        _cell[i][1] = obj._cell[i][1];
-        _cell[i][2] = obj._cell[i][2];
-    }
-    for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            _tau[i][j] = obj._tau[i][j];
-        }
-    }
-    for (int j = 0; j < 3; ++j) {
-        _rkt[j] = obj._rkt[j];
-        _norm[j] = obj._norm[j];
-    }
-    _s = obj._s;
-    return *this;
-}
-
-
-
-
-
 void CellQuad::CellFill(const double (&cell_in)[4][3]) {
     for (int i = 0; i < 4; i++) {
         _cell[i][0] = cell_in[i][0];
@@ -99,52 +58,6 @@ void CellQuad::CellFill(const double (&cell_in)[4][3]) {
 
 
 
-CellTriangle::CellTriangle(const CellTriangle& obj) {
-    for (int i = 0; i < 3; i++) {
-        _cell[i][0] = obj._cell[i][0];
-        _cell[i][1] = obj._cell[i][1];
-        _cell[i][2] = obj._cell[i][2];
-    }
-    
-    for (int i = 0; i < 3; i++) {
-        _tau[0][i] = obj._tau[0][i], _tau[1][i] =  obj._tau[1][i];
-        _rkt[i] = obj._rkt[i];
-        _norm[i] = obj._norm[i];
-    }
-    _s = obj._s;
-}
-
-
-
-
-
-
-CellTriangle& CellTriangle::operator=(const CellTriangle& obj) {
-    if (this == &obj) return *this;
-    for (int i = 0; i < 3; i++) {
-        _cell[i][0] = obj._cell[i][0];
-        _cell[i][1] = obj._cell[i][1];
-        _cell[i][2] = obj._cell[i][2];
-    }
-    for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            _tau[i][j] = obj._tau[i][j];
-        }
-    }
-    for (int j = 0; j < 3; ++j) {
-        _rkt[j] = obj._rkt[j];
-        _norm[j] = obj._norm[j];
-    }
-    _s = obj._s;
-    return *this;
-}
-
-
-
-
-
-
-
 void CellTriangle::CellFill(const double (&cell_in)[3][3]) {
     for (int i = 0; i < 3; i++) {
         _cell[i][0] = cell_in[i][0];
@@ -185,6 +98,52 @@ void CellTriangle::CellFill(const double (&cell_in)[3][3]) {
         _tau[1][k] /= len;
     }
 }
+
+
+
+
+
+
+/*
+CellTriangle& CellTriangle::operator=(const CellTriangle& obj) {
+    if (this == &obj) return *this;
+    for (int i = 0; i < 3; i++) {
+        _cell[i][0] = obj._cell[i][0];
+        _cell[i][1] = obj._cell[i][1];
+        _cell[i][2] = obj._cell[i][2];
+    }
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            _tau[i][j] = obj._tau[i][j];
+        }
+    }
+    for (int j = 0; j < 3; ++j) {
+        _rkt[j] = obj._rkt[j];
+        _norm[j] = obj._norm[j];
+    }
+    _s = obj._s;
+    return *this;
+}
+
+CellQuad& CellQuad::operator=(const CellQuad& obj) {
+    if (this == &obj) return *this;
+    for (int i = 0; i < 4; i++) {
+        _cell[i][0] = obj._cell[i][0];
+        _cell[i][1] = obj._cell[i][1];
+        _cell[i][2] = obj._cell[i][2];
+    }
+    for (int i = 0; i < 2; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            _tau[i][j] = obj._tau[i][j];
+        }
+    }
+    for (int j = 0; j < 3; ++j) {
+        _rkt[j] = obj._rkt[j];
+        _norm[j] = obj._norm[j];
+    }
+    _s = obj._s;
+    return *this;
+}*/
 
 
 } //namespace bielcc

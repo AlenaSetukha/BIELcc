@@ -29,7 +29,6 @@ namespace bielcc {
     }
 
 
-
     /**
         * @brief Plane wave magnetic field function
         * @details Hinc(x) = e^i(k, x) * (k x eo) / (omega * mu * mu0)

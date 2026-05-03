@@ -15,6 +15,7 @@
 #include "element_geom.h"
 #include "kernel_lib.h"
 #include "integrals_analytic.h"
+#include "constants.h"
 
 
 /**
@@ -181,7 +182,7 @@ int main(int argc, char **argv)
     //==============================================
     double k_wave = 1.;
     double analyticR_r = 3.0;
-    std::complex<double> sa = IntegralSimplePot_H_HS(rut1, x, analyticR_r,
+    std::complex<double> sa = IntegralSurf_SimplePot_H_HS(rut1, x, analyticR_r,
                                                    int_param_dim1, k_wave);
     std::cout << "Test4. Highlighting singularity in e^{ikr} / r" << std::endl;
     std::cout << "Semi analytical: " << sa / 4. / M_PI << std::endl;

@@ -9,7 +9,7 @@ namespace bielcc {
     
 namespace Tolerance_Constants {
     const double MACHINE_ZERO = std::numeric_limits<double>::epsilon();
-    const double POINT_TOLERANCE = 1e-6;
+    const double POINT_TOLERANCE = 1e-5;
     const double POINT_TOLERANCE_SQ = POINT_TOLERANCE * POINT_TOLERANCE;
 }
 }       // namespace bielcc

@@ -47,7 +47,7 @@ namespace bielcc {
 template<typename CellType>
 class SurfMesh {
 protected:
-    static constexpr std::size_t _NVertex = (std::is_same<CellType, CellQuad>::value) ? 4 : 3;
+    static constexpr int _NVertex = (std::is_same<CellType, CellQuad>::value) ? 4 : 3;
     std::vector<CellType> _cell_list;
 
     int _num_obj, _num_mod, _num_frm;
@@ -66,23 +66,18 @@ protected:
                       const std::vector<std::array<double, 3>>& points);
 
 public:
-    SurfMesh(const std::string& filename) { this->ReadFromFile(filename);};
-    SurfMesh(): _num_obj(0), _num_mod(0), _num_frm(0), _num_bl(0), _num_blSeg(0), _grid_step(0.0) {}
-    SurfMesh(const SurfMesh& obj): _cell_list(obj._cell_list),
-                        _num_obj(obj._num_obj), _num_mod(obj._num_mod), _num_frm(obj._num_frm),
-                        _num_bl(obj._num_bl), _num_blSeg(obj._num_blSeg), 
-                        _grid_step(obj._grid_step), _surf_square(obj._surf_square),
-                        _obj_num_frm(obj._obj_num_frm), _beg_endMod(obj._beg_endMod),
-                        _beg_endObj(obj._beg_endObj), _beg_endObjFrm(obj._beg_endObjFrm),
-                        _x_bound(obj._x_bound) {}
-
+    SurfMesh() = default;
+    virtual ~SurfMesh() = default;
+    SurfMesh(const SurfMesh&) = default;
+    SurfMesh& operator=(const SurfMesh&) = default;
+    // Move-constructors
+    SurfMesh(SurfMesh&&) noexcept = default;
+    SurfMesh& operator=(SurfMesh&&) noexcept = default;
 
 
     void ReadFromFile(const std::string& filename);
+    SurfMesh(const std::string& filename) { this->ReadFromFile(filename);};
 
-    SurfMesh& operator=(const SurfMesh& obj);
-
-    ~SurfMesh() = default;
 
 
 
@@ -121,31 +116,25 @@ public:
 
 
 
-    CellType GetCell(int i) {return _cell_list[i];}
     const CellType& GetCell(int i) const {return _cell_list[i];}
 
 
-    std::vector<CellType> GetTotalCellList() {return _cell_list;}
     const std::vector<CellType>& GetTotalCellList() const {return _cell_list;}
 
 
-    std::vector<std::pair<int, int>> GetBegEndObj() {return _beg_endObj;}
     const std::vector<std::pair<int, int>>& GetBegEndObj() const {return _beg_endObj;}
     /**
         * @brief First and last module in object objN
         * @param objN object number
     */
-    std::pair<int, int> GetFLModInObj(int objN) {return _beg_endObj[objN];}
     const std::pair<int, int>& GetFLModInObj(int objN) const {return _beg_endObj[objN];}
 
 
-    std::vector<std::pair<int, int>> GetBegEndMod() {return _beg_endMod;}
     const std::vector<std::pair<int, int>>& GetBegEndMod() const {return _beg_endMod;}
     /**
         * @brief First and last cell in module modN
         * @param objN object number
     */
-    std::pair<int, int> GetFLFrmInMod(int modN) {return _beg_endMod[modN];}
     const std::pair<int, int>& GetFLFrmInMod(int modN) const {return _beg_endMod[modN];}
 
 
@@ -153,14 +142,12 @@ public:
         * @brief First and last cell in object objN
         * @param objN object number
     */
-    std::pair<int, int> GetFLFrmInObj(int objN) {return _beg_endObjFrm[objN];}
     const std::pair<int, int>& GetFLFrmInObj(int objN) const {return _beg_endObjFrm[objN];}
 
 
-    std::vector<std::array<std::array<double, 3>, 2>> GetXBound() {return _x_bound;}
     const std::vector<std::array<std::array<double, 3>, 2>>& GetXBound() const {return _x_bound;}
 
-
+    constexpr int GetNVertex() const {return _NVertex;}
 
 
 
@@ -168,8 +155,9 @@ public:
 
     /**
         * @brief Formation cell list of certain object
-        * @details {cells_j}, j = (first_in_obj, last_in_obj)
+        * @details {cells_j}, j = (first_cell_in_obj, last_cell_in_obj)
         * @param objN object number
+        * @return vector of object objN cells (one-typed)
     */
     std::vector<CellType> FormObjCellList(int objN) const;
 
@@ -177,22 +165,35 @@ public:
 
 
     /**
-        * @brief Formation of basis functions on each cell in an array.
+        * @brief Formation of all basis functions on each cell in an array.
         * @details {tau_i^1, tau_i^2}, i = (1, num_frm)
-        * @param surface_basis set of all basis coordinates
+        * @param surface_basis result set of all basis coordinates
         * @note memory must be allocated correctly: [num_frm][2][3]
     */ 
-    void FormTotalSurfaceBasis(double*** surface_basis) const;
-    std::vector<std::array<std::array<double, 3>, 2>> FormTotalSurfaceBasis() const;
+    void FormSurfaceBasis(double*** surface_basis) const;
+    /**
+        * @brief Formation of all basis functions on each cell in an array.
+        * @return vector of all basis coordinates
+        * @details {tau_i^1, tau_i^2}, i = (1, num_frm)
+    */ 
+    std::vector<std::array<std::array<double, 3>, 2>> FormSurfaceBasis() const;
+
+
 
     /**
         * @brief Formation of cell basis functions on certain object in an array.
         * @details {tau_i^1, tau_i^2}, i = (1_Obj, last_Obj)
         * @param objN obect number
         * @param surface_basis set of all basis coordinates on certain object
-        * @note memory must be allocated correctly: [GetObjNFrm[objN]][2][3]
+        * @note memory must be allocated correctly: [ObjNFrm[objN]][2][3]
     */ 
     void FormObjSurfaceBasis(int objN, double*** surface_basis) const;
+    /**
+        * @brief Formation of cell basis functions on certain object in an array.
+        * @details {tau_i^1, tau_i^2}, i = (1_Obj, last_Obj)
+        * @param objN obect number
+        * @return vector of all basis coordinates on certain object
+    */ 
     std::vector<std::array<std::array<double, 3>, 2>> FormObjSurfaceBasis(int objN) const;
 
 
@@ -204,28 +205,40 @@ public:
 
 
     /**
-        * @brief Formation of collocation points on each cell in an array.
+        * @brief Formation of all collocation points on each cell in an array.
         * @details {rkt_i}, i = 1, num_frm
         * @param colloc_points set of all collocation points coordinates
         * @note memory must be allocated correctly: [num_frm][3]
     */
     void FormCollocPoints(double** colloc_points) const;
+    /**
+        * @brief Formation of all collocation points on each cell in an array.
+        * @details {rkt_i}, i = 1, num_frm
+        * @return vector of all collocation points coordinates
+    */
     std::vector<std::array<double, 3>> FormCollocPoints() const;
 
 
 
 
     /**
-        * @brief Formation of normal vectors on each cell in an array.
+        * @brief Formation of all normal vectors on each cell in an array.
         * @details {norm_i}, i = 1, num_frm
         * @param colloc_points set of all normal vectors coordinates
-        * @note memory must be allocated correctly: [num_frm][3]
+        * @note memory must be allocated correctly: [total_num_frm][3]
     */
     void FormNormalVectors(double** n_vec) const;
+    /**
+        * @brief Formation of all normal vectors on each cell in an array.
+        * @details {norm_i}, i = 1, num_frm
+        * @return set of all normal vectors coordinates
+    */
     std::vector<std::array<double, 3>> FormNormalVectors() const;
 
+
+
     /**
-        * @brief Formation of cvertex coordinates on each cell in an array.
+        * @brief Formation of all vertex coordinates on each cell in an array.
         * @details {cell_i[4][3]}, i = 1, num_frm
         * @param cell_list_coords set of all collocation points coordinates
         * @note memory must be allocated correctly: [num_frm][NVertex][3]
@@ -233,6 +246,12 @@ public:
     void FormCellListCoords(double*** cell_list_coords) const;
 
 
+
+    /**
+        * @brief Formation of all vertex coordinates on each cell in an array.
+        * @details {cell_i[4][3]}, i = 1, num_frm
+        * @return set of all collocation points coordinates
+    */
     auto FormCellListCoords() const {
         const size_t _CellPointsN = (std::is_same<CellType, CellQuad>::value) ? 4 : 3;
         std::vector<std::array<std::array<double, 3>, _CellPointsN>> cells;
@@ -518,47 +537,6 @@ void SurfMesh<CellType>::ReadFromVtkFile(const std::string& filename)
 
 
 
-//===========================================================
-//----------------------Operators----------------------------
-//===========================================================
-template<typename CellType>
-SurfMesh<CellType>& SurfMesh<CellType>::operator=(const SurfMesh<CellType>& obj) {
-    if (this != &obj) {
-        _cell_list = obj._cell_list;
-
-        _num_obj = obj._num_obj;
-        _num_mod = obj._num_mod;
-        _num_frm = obj._num_frm;
-        _num_bl = obj._num_bl;
-        _num_blSeg = obj._num_blSeg;
-        _grid_step = obj._grid_step;
-        _surf_square = obj._surf_square;
-        _obj_num_frm = obj._obj_num_frm;
-
-        _beg_endMod = obj._beg_endMod;
-        _beg_endObj = obj._beg_endObj;
-        _beg_endObjFrm = obj._beg_endObjFrm;
-        _x_bound = obj._x_bound;
-    }
-    return *this;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -583,7 +561,7 @@ std::vector<CellType> SurfMesh<CellType>::FormObjCellList(int objN) const {
 
 
 template<typename CellType>
-void SurfMesh<CellType>::FormTotalSurfaceBasis(double*** surface_basis) const
+void SurfMesh<CellType>::FormSurfaceBasis(double*** surface_basis) const
 {
     for (int i = 0; i < _num_frm; i++) {
         const double* tau1 = _cell_list[i].GetTau1();
@@ -597,7 +575,7 @@ void SurfMesh<CellType>::FormTotalSurfaceBasis(double*** surface_basis) const
 
 
 template<typename CellType>
-std::vector<std::array<std::array<double, 3>, 2>>  SurfMesh<CellType>::FormTotalSurfaceBasis() const
+std::vector<std::array<std::array<double, 3>, 2>>  SurfMesh<CellType>::FormSurfaceBasis() const
 {
     std::vector<std::array<std::array<double, 3>, 2>> surface_basis;
     surface_basis.resize(_num_frm);
@@ -638,26 +616,14 @@ std::vector<std::array<std::array<double, 3>, 2>>
     std::vector<std::array<std::array<double, 3>, 2>> obj_surface_basis;
     obj_surface_basis.resize(ObjNFrm);
 
-    
-    
-    int start_mod = _beg_endObj[objN].first; 
-    int end_mod = _beg_endObj[objN].second;
-
-    for (int i = start_mod; i <= end_mod; i++) {
-        int f_cell = _beg_endMod[i].first;
-        int l_cell = _beg_endMod[i].second;
-        for (int j = f_cell; j < l_cell; j++) {
-
-        }
-        obj_surface_basis.insert(obj_surface_basis.end(), _cell_list);
-    }
-
-    for (int i = 0; i < ObjNFrm; i++) {
+    int start_frm = _beg_endObjFrm[objN].first; 
+    int end_frm = _beg_endObjFrm[objN].second;
+    for (int i = start_frm; i <= end_frm; i++) {
         const double* tau1 = _cell_list[i].GetTau1();
         const double* tau2 = _cell_list[i].GetTau2();
         for (int j = 0; j < 3; j++) {
-            obj_surface_basis[i][0][j] = tau1[j];
-            obj_surface_basis[i][1][j] = tau2[j];
+            obj_surface_basis[i - start_frm][0][j] = tau1[j];
+            obj_surface_basis[i - start_frm][1][j] = tau2[j];
         }
     }
     return obj_surface_basis;
@@ -726,10 +692,12 @@ template<typename CellType>
 std::vector<std::array<double, 3>>  SurfMesh<CellType>::FormNormalVectors() const
 {
     std::vector<std::array<double, 3>> n_vec;
-    n_vec.reserve(_num_frm);
+    n_vec.resize(_num_frm);
     for (int i = 0; i < _num_frm; i++) {
         const double* norm =  _cell_list[i].GetNorm();
-        n_vec.push_back({norm[0], norm[1], norm[2]});
+        n_vec[i][0] = norm[0];
+        n_vec[i][1] = norm[1];
+        n_vec[i][2] = norm[2];
     }
     return n_vec;
 }
@@ -751,7 +719,5 @@ void SurfMesh<CellType>::FormCellListCoords(double*** cell_list_coords) const
         }
     }
 }
-
-
 }       // namepace bielcc
 #endif  // _SURF_MESH_H_

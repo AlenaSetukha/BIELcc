@@ -77,8 +77,8 @@ protected:
     double _eps_r, _mu_r;
     double _sigma;
     double _tand, _tanm; // tanm not used yet
-    ChangeMaterialTypeDir _change_type_dir = ChangeMaterialTypeDir::Isotropic;
-    ChangeMaterialTypeFreq _change_type_freq = ChangeMaterialTypeFreq::Dispersive;
+    ChangeMaterialTypeDir _change_type_dir;
+    ChangeMaterialTypeFreq _change_type_freq;
 
     std::optional<std::map<double, double>> _n_refract = std::nullopt;
     std::optional<std::map<double, double>> _k_reflect = std::nullopt; // <freq, n>, <freq, k>
@@ -91,41 +91,42 @@ protected:
 
 
     void CalcEps(double freq);
-    void CalcEps(double freq, double n);
-    void CalcEps(double freq, double n, double k_reflect);
-    void CalcMu(double freq);
+    void CalcEpsN(double n);
+    void CalcEpsNK(double n, double k_reflect);
+    void CalcMu();
     void CalcSkinDepth(double freq);
 
 public:
+    MaterialParam& operator=(const MaterialParam&) = default;
     MaterialParam(): _material_name(""), _eps_r(0.), _mu_r(0.),
                             _sigma(0.), _tand(0.), _tanm(0.) {}
 
     MaterialParam(std::string name, ChangeMaterialTypeDir change_type_dir,
                     ChangeMaterialTypeFreq change_type_freq, double eps_r,
                      double mu_r, double sigma, double tand, double tanm):
-                   _material_name(name), _change_type_dir(change_type_dir),
-                    _change_type_freq(change_type_freq), _eps_r(eps_r),
-                    _mu_r(mu_r), _sigma(sigma), _tand(tand), _tanm(tanm) {}
+                    _material_name(name),  _eps_r(eps_r),
+                    _mu_r(mu_r), _sigma(sigma), _tand(tand), _tanm(tanm),
+                    _change_type_dir(change_type_dir),
+                    _change_type_freq(change_type_freq) {}
 
 
 
     MaterialParam(std::string name, ChangeMaterialTypeDir change_type_dir,
                                   ChangeMaterialTypeFreq change_type_freq,
                                 const std::map<double, double>& n_refract,
-                                       double mu_r): _material_name(name),
+                          double mu_r): _material_name(name), _mu_r(mu_r),
                                         _change_type_dir(change_type_dir),
                                       _change_type_freq(change_type_freq),
-                                     _n_refract(n_refract), _mu_r(mu_r) {}
+                                                  _n_refract(n_refract) {}
 
     MaterialParam(std::string name, ChangeMaterialTypeDir change_type_dir,
                                   ChangeMaterialTypeFreq change_type_freq,
                                 const std::map<double, double>& n_refract,
                                 const std::map<double, double>& k_reflect,
-                                       double mu_r): _material_name(name),
+                          double mu_r): _material_name(name), _mu_r(mu_r),
                                         _change_type_dir(change_type_dir),
                                       _change_type_freq(change_type_freq),
-                             _n_refract(n_refract), _k_reflect(k_reflect),
-                                                            _mu_r(mu_r) {}
+                           _n_refract(n_refract), _k_reflect(k_reflect) {}
     
 
     MaterialParam(const MaterialParam& obj);
@@ -170,8 +171,8 @@ public:
 class ShellParam {
 private:
     double _thickness;
-    std::complex<double> _Z_Matrix[2][2], _Y_Matrix[2][2];
     MaterialParam _ext_material, _shell_material;
+    std::complex<double> _Z_Matrix[2][2], _Y_Matrix[2][2];
 
 public:
 /** 

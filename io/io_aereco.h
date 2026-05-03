@@ -85,6 +85,27 @@ struct IO_AERECO {
     }
 
     /**
+        * @brief Writing list of 3D-vectors to an aereco-file.
+        * @param filename name of vtk-file 
+        * @param vals writing data 
+    */
+    template<typename ValType>
+    void WriteVecs(const std::string& filename, int N,
+                                  const ValType** vals)
+    {
+        std::ofstream fout_j(filename);
+        if (!fout_j.is_open()) {
+            throw std::runtime_error("IO_AERECO::WriteVecs error. Can't open file: " + filename);
+        }
+
+        fout_j << 2 << " " << N / 2 << std::endl;
+        for (int i = 0; i < N; i++) {
+            fout_j << vals[i][0] << " " << vals[i][1] << " " << vals[i][2] << std::endl;
+        }
+        fout_j.close();
+    }
+
+    /**
         * @brief Writing list of complex 3D-vectors to an aereco-files.
         * @param filenameReal name of real-part file 
         * @param filenameImage name of image-part file 

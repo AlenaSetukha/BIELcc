@@ -11,23 +11,35 @@ namespace bielcc {
 /**
  * Point structure consist of three coordinates {x, y, z}.
  * @note Two points considered identical with an accuracy POINT_TOLERANCE
- */
+*/
 
 /**
- * @brief Point structure
- */
+    * @brief Point structure
+*/
 
 struct Point {
-    double x, y, z;
-    Point(): x(0.0), y(0.0), z(0.0) {}
-    Point(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
-    Point(const double* pnt): x(pnt[0]), y(pnt[1]), z(pnt[2]) {}
-    Point(const Point& obj) {x = obj.x;
-                             y = obj.y;
-                             z = obj.z; };
-
+    double coords[3]{};
+    
+    Point() = default;
     ~Point() = default;
+    Point(const Point&) = default;
+    Point& operator=(const Point&) = default;
+    // Move-constructors
+    Point(Point&&) noexcept = default;
+    Point& operator=(Point&&) noexcept = default;
+    
 
+
+
+    Point(double _x, double _y, double _z) {
+        coords[0] = _x;
+        coords[1] = _y;
+        coords[2] =  _z;}
+    Point(const double* pnt) {
+        coords[0] = pnt[0];
+        coords[1] = pnt[1];
+        coords[2] = pnt[2];
+    }
 
     bool operator==(const Point& other) const;
     bool operator<(const Point& other) const;
@@ -36,10 +48,7 @@ struct Point {
     Point operator-(const Point& other) const;
     Point operator*(double a) const;
 
-
-    void GetCoord(double (&coord)[3]) const {coord[0] = x;
-                                             coord[1] = y;
-                                             coord[2] = z;}
+    const double* GetCoord() const {return coords;}
 };
 
 

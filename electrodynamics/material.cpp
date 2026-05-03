@@ -60,9 +60,9 @@ MaterialParam::MaterialParam(const MaterialParam& obj)
 void MaterialParam::Calc(double freq) {
     if (_change_type_freq == ChangeMaterialTypeFreq::DispersiveByRefractIndex) {
         if (_n_refract != std::nullopt && _k_reflect != std::nullopt) {
-            CalcEps(freq, (*_n_refract)[freq], (*_k_reflect)[freq]); 
+            CalcEpsNK((*_n_refract)[freq], (*_k_reflect)[freq]); 
         } else if (_n_refract != std::nullopt) {
-            CalcEps(freq, (*_n_refract)[freq]);
+            CalcEpsN((*_n_refract)[freq]);
         } else {
             std::cerr << "MaterialParam::Calc: No matching frequency in refractive indexes" << "\n";
             return;
@@ -70,7 +70,7 @@ void MaterialParam::Calc(double freq) {
     } else {
         CalcEps(freq);
     }
-    CalcMu(freq);
+    CalcMu();
     CalcSkinDepth(freq);
 }
 
@@ -93,20 +93,20 @@ void MaterialParam::CalcEps(double freq) {
 }
 
 
-void MaterialParam::CalcEps(double freq, double n) {
+void MaterialParam::CalcEpsN( double n) {
     _eps = n * n * ED_Constants::eps0;
     _tand =  0.;
 }
 
 
 
-void MaterialParam::CalcEps(double freq, double n, double k) {
+void MaterialParam::CalcEpsNK(double n, double k) {
     _eps = std::complex<double>(n * n - k * k, 2. * n * k) * ED_Constants::eps0;
     _tand =  2. * n * k * ED_Constants::eps0;
 }
 
 
-void MaterialParam::CalcMu(double freq) {
+void MaterialParam::CalcMu() {
     /*if (_tanm == 0.) {
         _mu = Constants::mu0 * _mu_r;
     } else {

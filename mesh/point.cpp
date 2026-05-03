@@ -7,9 +7,9 @@
 namespace bielcc {
 
 bool Point::operator==(const Point& other) const {
-    double dx = x - other.x;
-    double dy = y - other.y;
-    double dz = z - other.z;
+    const double dx = coords[0] - other.coords[0];
+    const double dy = coords[1] - other.coords[1];
+    const double dz = coords[2] - other.coords[2];
     return (dx * dx + dy * dy + dz * dz) < Tolerance_Constants::POINT_TOLERANCE_SQ;
 }
 
@@ -17,11 +17,11 @@ bool Point::operator==(const Point& other) const {
 double Point::operator[](int i) const {
     switch (i) {
         case 0:
-            return x;
+            return coords[0];
         case 1:
-            return y;
+            return coords[1];
         case 2: 
-            return z;
+            return coords[2];
         default:
             throw std::runtime_error("Memory error: wrong index in Point");
     }
@@ -32,26 +32,33 @@ double Point::operator[](int i) const {
 
 
 Point Point::operator+(const Point& other) const {
-    return Point(x + other.x, y + other.y, z + other.z);
+    return Point(coords[0] + other.coords[0],
+                 coords[1] + other.coords[1],
+                 coords[2] + other.coords[2]);
 }
 
 Point Point::operator-(const Point& other) const {
-    return Point(x - other.x, y - other.y, z - other.z);
+    return Point(coords[0] - other.coords[0],
+                 coords[1] - other.coords[1],
+                 coords[2] - other.coords[2]);
 }
 
 Point Point::operator*(double a) const {
-    return Point(x * a, y * a, z * a);
+    return Point(coords[0] * a, coords[1] * a, coords[2] * a);
 }
 
 // Сравнение в лексиграфическом порядке
 bool Point::operator<(const Point& other) const
 {
-    if (x < other.x) {return true;}
-    if (x > other.x) {return false;}
-    if (y < other.y) {return true;}
-    if (y > other.y) {return false;}
-    if (z < other.z) {return true;}
-    if (z > other.z) {return false;}
-    return false;
+    if (std::abs(coords[0] - other.coords[0]) > Tolerance_Constants::POINT_TOLERANCE) {
+        return coords[0] < other.coords[0];
+    }
+    if (std::abs(coords[1] - other.coords[1]) > Tolerance_Constants::POINT_TOLERANCE) {
+        return coords[1] < other.coords[1];
+    }
+    if (std::abs(coords[2] - other.coords[2]) > Tolerance_Constants::POINT_TOLERANCE) {
+        return coords[2] < other.coords[2];
+    }
+    return false; // Точки равны с учетом Tolerance_Constants::POINT_TOLERANCE
 }
 } // namespace bielcc

@@ -568,12 +568,10 @@ void Ker_AverDiv_NearEdge(const double *x, const double *y,
 inline double Ker_BasicAverFunc(const double *x, const double *y,
                                          const double eps)
 {
-    double res, deg;
-
     if (dist(x, y) > eps) {
         return 0.;
     }
-    deg = dist(x, y) * dist(x, y) / eps / eps;
+    double deg = dist(x, y) * dist(x, y) / eps / eps;
     return exp(deg) / M_PI / eps / eps;
 }
 

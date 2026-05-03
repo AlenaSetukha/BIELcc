@@ -34,14 +34,17 @@ protected:
 
 public:
     CellQuad() = default;
-    CellQuad(const CellQuad& obj);
     ~CellQuad() = default;
+    CellQuad(const CellQuad&) = default;
+    CellQuad& operator=(const CellQuad&) = default;
+    // Move-constructors
+    CellQuad(CellQuad&&) noexcept = default;
+    CellQuad& operator=(CellQuad&&) noexcept = default;
 
-    CellQuad& operator=(const CellQuad& obj);
+
+
 
     void CellFill(const double (&cell_in)[4][3]);
-
-
     void GetCellCoords(double (&cell)[4][3]) const {
         for (int i = 0; i < 4; i++) {
             cell[i][0] = _cell[i][0];
@@ -54,21 +57,16 @@ public:
     const double (&GetTau() const)[2][3] {return _tau;}
 
     const double* GetTau1() const {return _tau[0];}
-    double* GetTau1() {return _tau[0];}
 
     const double* GetTau2() const {return _tau[1];}
-    double* GetTau2() {return _tau[1];}
 
     const double* GetRkt() const {return _rkt;}
-    double* GetRkt() {return _rkt;}
 
     const double* GetNorm() const {return _norm;}
-    double* GetNorm() {return _norm;}
 
     const double* GetVertex(int i) const {return _cell[i];} 
-    double* GetVertex(int i) {return _cell[i];}
 
-    double GetArea() {return _s;};
+    double GetArea() const {return _s;};
 };
 
 
@@ -104,10 +102,13 @@ private:
 
 public:
     CellTriangle() = default;
-    CellTriangle(const CellTriangle& obj);
     ~CellTriangle() = default;
+    CellTriangle(const CellTriangle&) = default;
+    CellTriangle& operator=(const CellTriangle&) = default;
+    CellTriangle(CellTriangle&&) noexcept = default;
+    CellTriangle& operator=(CellTriangle&&) noexcept = default;
 
-    CellTriangle& operator=(const CellTriangle& obj);
+    
 
     void CellFill(const double (&cell_in)[3][3]);
 
@@ -124,21 +125,16 @@ public:
     const double (&GetTau() const)[2][3] {return _tau;}
 
     const double* GetTau1() const {return _tau[0];}
-    double* GetTau1() {return _tau[0];}
 
     const double* GetTau2() const {return _tau[1];}
-    double* GetTau2() {return _tau[1];}
 
     const double* GetRkt() const {return _rkt;}
-    double* GetRkt() {return _rkt;}
 
     const double* GetNorm() const {return _norm;}
-    double* GetNorm() {return _norm;}
 
     const double* GetVertex(int i) const {return _cell[i];} // should not be delated by the caller!!!
-    double* GetVertex(int i) {return _cell[i];}
     
-    double GetArea() {return _s;};
+    double GetArea() const {return _s;};
 };
 
 
