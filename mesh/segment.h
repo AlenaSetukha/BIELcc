@@ -10,18 +10,16 @@ namespace bielcc {
 //--------------------Segment structure----------------------
 //===========================================================
 /**
- * Segment structure consist of two points.
- * Fields:
- *      nA - starting point number from the list
- *      nB - ending point number from the list
- *      ACoords - starting point coordinates
- *      BCoords - ending point coordinates
- * @note Segment is ordered by point numbers (nA <= nB), comparison on the same principle.
- */
+    * Segment structure consist of two points.
+    * Fields:
+    *      nA - starting point number from the list
+    *      nB - ending point number from the list
+*/
 
 /**
- * @brief Segment structure
- */
+    * @brief Segment structure consist of two points numbers
+    * @note Segment is ordered by point numbers (nA <= nB), comparison on the same principle
+*/
 struct Segment {
     int nA, nB;
 
@@ -45,10 +43,23 @@ struct Segment {
     double operator[](int i) const;
 
 
-
+    /**
+        * @brief Segment points numbers
+        * @param vi Numbers of start / end points
+    */ 
     void GetVertIndx(int (&vi)[2]) const {vi[0] = nA;
                                           vi[1] = nB;}
+
+    /**
+        * @brief Start point number
+        * @return Start point number
+    */ 
     int GetStartIndx() const {return nA;}
+
+    /**
+        * @brief End point number
+        * @return End point number
+    */ 
     int GetEndIndx() const {return nB;}
 };
 

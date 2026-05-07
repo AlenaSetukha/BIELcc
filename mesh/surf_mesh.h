@@ -41,8 +41,8 @@
 
 namespace bielcc {
 /**
- * @brief Surface mesh class (dim = 3) consisting of quadrangular or triangular cells.
- * @note Cells order corresponds file cells order
+    * @brief Basic surface mesh class (dim = 3) consisting of quadrangular or triangular cells.
+    * @note Cells order corresponds file cells order
 */
 template<typename CellType>
 class SurfMesh {
@@ -76,6 +76,12 @@ public:
 
 
     void ReadFromFile(const std::string& filename);
+
+    /**
+        * @brief Reading surf mesh from file
+        * @param filename Full path to surface mesh file
+        * @note Supported: .dat, .vtk
+    */ 
     SurfMesh(const std::string& filename) { this->ReadFromFile(filename);};
 
 
@@ -115,14 +121,25 @@ public:
 
 
 
-
+    /**
+        * @brief i-th cell from cell list
+        * @return Const copy of CellType cell
+    */ 
     const CellType& GetCell(int i) const {return _cell_list[i];}
 
-
+    /**
+        * @brief List of all cells forming surf-mesh
+        * @return Const copy of CellType cell list
+    */ 
     const std::vector<CellType>& GetTotalCellList() const {return _cell_list;}
 
-
+    
+    /**
+        * @brief Common list of pairs <first, last> cell numbers in each object
+        * @return Const copy of pairs vector
+    */ 
     const std::vector<std::pair<int, int>>& GetBegEndObj() const {return _beg_endObj;}
+
     /**
         * @brief First and last module in object objN
         * @param objN object number
@@ -130,6 +147,11 @@ public:
     const std::pair<int, int>& GetFLModInObj(int objN) const {return _beg_endObj[objN];}
 
 
+
+    /**
+        * @brief Common list of pairs <first, last> cell numbers in each module
+        * @return Const copy of pairs vector
+    */ 
     const std::vector<std::pair<int, int>>& GetBegEndMod() const {return _beg_endMod;}
     /**
         * @brief First and last cell in module modN
@@ -145,8 +167,18 @@ public:
     const std::pair<int, int>& GetFLFrmInObj(int objN) const {return _beg_endObjFrm[objN];}
 
 
+
+    /**
+        * @brief Common list of pairs <first, last> cell numbers in each object
+        * @return Const copy of pairs vector
+    */ 
     const std::vector<std::array<std::array<double, 3>, 2>>& GetXBound() const {return _x_bound;}
 
+
+    /**
+        * @brief Cell type
+        * @return Vertex count in CellType
+    */ 
     constexpr int GetNVertex() const {return _NVertex;}
 
 

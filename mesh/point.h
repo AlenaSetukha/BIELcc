@@ -9,14 +9,10 @@ namespace bielcc {
 //----------------------Point structure----------------------
 //===========================================================
 /**
- * Point structure consist of three coordinates {x, y, z}.
- * @note Two points considered identical with an accuracy POINT_TOLERANCE
+    * @brief Point structure {x, y, z}
+    * @note Two points considered identical with an
+    * accuracy POINT_TOLERANCE from geometry/tolerance_constants.h
 */
-
-/**
-    * @brief Point structure
-*/
-
 struct Point {
     double coords[3]{};
     
@@ -48,6 +44,10 @@ struct Point {
     Point operator-(const Point& other) const;
     Point operator*(double a) const;
 
+    /**
+        * @brief Point coordinates
+        * @return Const reference to the point coordinates
+    */
     const double* GetCoord() const {return coords;}
 };
 

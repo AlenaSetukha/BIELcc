@@ -20,52 +20,46 @@
 
 
 
-
-
-/// ЧИСТКА ПАМЯТИ (ПРАВИЛЬНАЯ):
-// std::for_each( orders.begin(), orders.end(), std::default_delete<Order>() );
-// edge-ort безотносительно реальному напрвлению!!!!!
-// Псевдочетырехугольные ячейки
-// Проверить - что быстрее вложенный  vector или ***
-
-
 namespace bielcc {
 
 //===========================================================
 //---------------RWG-type surface mesh class-----------------
 //===========================================================
 /**
- * @brief Detailed surface mesh class (dim = 3) for rwg-type.
- * Consist of quadrangular or triangular cells.
- * Fields:
- *      _n_points - number of unique grid points
- *      _points - list of unique points coordinates (double [num_points][3])
- *      _point_num_cells - number of cells in which each point lies (int [num_points])
- *      _point_cells - cell numbers for each point (int [num_points][*])
- *      _cell_points - corner points numbers for each cell (int [num_frm][4 / 3]) 
- *      _point_edges - edges numbers for each point (where point lies)
- * 
- *      _n_edges - number of unique edges
- *      _edges - unique edges (Segment [num_edges])
- *      _edge_num_cells - the number of cells that each edge borders (int [num_edges])
- *      _edge_cells - cell numbers for each edge (int [num_edges][*])
- *      _edge_mid - coordinates of the edge centers (double [num_edges][3])
- *      _edge_ort - coordinates of the edge orts (double [num_edges][3])
- * 
- *      _cell_edge_dirIndex - direction match between cell side and edge from the list  (int [num_frm][4 / 3])
- *      _cell_edges - number from the edge list for each side of the cell (int [num_frm][4 / 3])
- *      _cell_nghb_by_edge - side neighbors for each cell (int [num_frm][NVertex][edge_num_frm[k]])
- * 
- * Notes:
- *      _cell_edge_dirIndex[i][j] = {1 - same, -1 - opposite, 0 - empty edge}
- *      _cell_nghb_by_edge[i][j] = {-5} if the edge ia EMPTY or lies only in one OWN cell
- *      _edge_ort[j] - LOCAL direction, NO mult by dir_index
- * 
- */
+    * Detailed surface mesh class (dim = 3) for rwg-type.
+    * Consist of quadrangular or triangular cells.
+    * Fields:
+    *      _n_points - number of unique grid points
+    *      _points - list of unique points coordinates (double [num_points][3])
+    *      _point_num_cells - number of cells in which each point lies (int [num_points])
+    *      _point_cells - cell numbers for each point (int [num_points][*])
+    *      _cell_points - corner points numbers for each cell (int [num_frm][4 / 3]) 
+    *      _point_edges - edges numbers for each point (where point lies)
+    * 
+    *      _n_edges - number of unique edges
+    *      _edges - unique edges (Segment [num_edges])
+    *      _edge_num_cells - the number of cells that each edge borders (int [num_edges])
+    *      _edge_cells - cell numbers for each edge (int [num_edges][*])
+    *      _edge_mid - coordinates of the edge centers (double [num_edges][3])
+    *      _edge_ort - coordinates of the edge orts (double [num_edges][3])
+    * 
+    *      _cell_edge_dirIndex - direction match between cell side and edge from the list  (int [num_frm][4 / 3])
+    *      _cell_edges - number from the edge list for each side of the cell (int [num_frm][4 / 3])
+    *      _cell_nghb_by_edge - side neighbors for each cell (int [num_frm][NVertex][edge_num_frm[k]])
+    * 
+    * Notes:
+    *       _cell_edges = -5 for empty edge
+    *      _cell_edge_dirIndex[i][j] = {1 - same, -1 - opposite, 0 - empty edge}
+    *      _cell_nghb_by_edge[i][j] = {-5} if the edge ia EMPTY or lies only in one OWN cell
+    *      _edge_ort[j] - LOCAL direction, NO mult by dir_index
+*/
 
- /**
-  * @brief Detailed surface mesh class (dim = 3) for rwg-type.
-  */
+
+
+
+/**
+    * @brief Detailed surface mesh class (dim = 3) for rwg-type with Celltype cells.
+*/
 template<typename CellType>
 class RwgSurfMesh: public SurfMesh<CellType> {
 protected:
@@ -83,8 +77,6 @@ protected:
     std::vector<std::vector<int>> _edge_cells;
     std::vector<Point> _edge_mid, _edge_ort;
     std::vector<std::array<int, SurfMesh<CellType>::_NVertex>> _cell_edges;
-    // Важное: в случае псевдочетырехугольной ячейки(2 вершины совпадают),
-    //       _cell_edge_dir_indx[j][k] = 0, а _cell_edges[j][k] = -5 
     std::vector<std::array<int, SurfMesh<CellType>::_NVertex>> _cell_edge_dirIndex;
     std::vector<std::vector<std::vector<int>>> _cell_nghb_by_edge;
 
@@ -106,61 +98,201 @@ public:
                                                        {this->RwgSurfMeshFill();};
 
 
+
+
+    /**
+        * @brief Number of rwg-mesh unique points (with some POINT_TOLERANCE)
+        * @return Number of unique points
+    */                                                   
     int GetNPoints() const {return _n_points;}
-    int GetNEdges() const {return _n_edges;}
 
-
-
-
-
-    const std::vector<Point>& GetPoints() const {return _points;};
+    /**
+        * @brief i-th point of rwg-mesh
+        * @return Const copy point
+    */ 
     const Point& GetPoint(int i) const {return _points[i];}
 
+    /**
+        * @brief List of unique rwg-mesh points
+        * @return Const copy of unique points vector
+    */ 
+    const std::vector<Point>& GetPoints() const {return _points;};
+
+    /**
+        * @brief Count of cells in which i-th point lies
+        * @param i Point number
+        * @return Count of cells
+    */ 
     int GetPointNumCells(int i) const {return _point_num_cells[i];};
 
-    int GetPointCells(int i, int j) const {return _point_cells[i][j];};
+    /**
+        * @brief One of the cells number in which the point lies
+        * @param i Point number
+        * @param j Cell serial number
+        * @return Point cell number
+    */ 
+    int GetPointCell(int i, int j) const {return _point_cells[i][j];};
 
-    const std::vector<std::array<int, SurfMesh<CellType>::_NVertex>>& GetCellPoints() const {return _cell_points;};
+    /**
+        * @brief List of vertex numbers of each cell in rwg-mesh
+        * @return Const copy of vertex numbers vector
+    */ 
+    const std::vector<std::array<int, SurfMesh<CellType>::_NVertex>>& GetCellsPoints() const {return _cell_points;};
+    
+    /**
+        * @brief List of vertex numbers of i-th cell
+        * @param i Cell number
+        * @return Const copy of vertex numbers vector
+    */
     const std::array<int, SurfMesh<CellType>::_NVertex>& GetCellPoints(int i) const {return _cell_points[i];}
 
+    /**
+        * @brief List of edges numbers for i-th point
+        * @param i Point number
+        * @return Const copy of edges numbers vector
+    */
+    const std::vector<int>& GetPointEdges(int i) const {return _point_edges[i];}
 
-    const std::vector<int>& GetPointEdges(int nPnt) const {return _point_edges[nPnt];}
 
 
+
+
+    
+    /**
+        * @brief Number of rwg-mesh unique edges
+        * @return Number of unique edges
+    */ 
+    int GetNEdges() const {return _n_edges;}
+
+    /**
+        * @brief List of all unique edges in rwg-mesh
+        * @return Const copy of edges vector
+    */ 
     const std::vector<Segment>& GetEdges() const {return _edges;}
+
+    /**
+        * @brief i-th edge
+        * @param i Edge number
+        * @return Const copy of edge
+    */ 
     const Segment& GetEdge(int i) const {return _edges[i];}
 
+    /**
+        * @brief Count of cells in which i-th edge lies
+        * @param i Edge number
+        * @return Count of cells
+    */ 
     int GetEdgeNumCells(int i) const {return _edge_num_cells[i];}
 
+    /**
+        * @brief List of cell numbers in which edge lies
+        * @return Const copy of cell numbers for each edge vector
+    */ 
     const std::vector<std::vector<int>>& GetEdgeCells() const {return _edge_cells;}
+
+    /**
+        * @brief Certain cell number for edge
+        * @param i Edge number
+        * @param j Cell serial number
+        * @return j-th cell number for i-th edge
+    */ 
     int GetEdgeCell(int i, int j) const {return _edge_cells[i][j];}
 
-    const std::vector<Point>& GetEdgeMid() const {return _edge_mid;}
+    /**
+        * @brief Middle point for all edges
+        * @return Const copy of edges middle point vector
+    */ 
+    const std::vector<Point>& GetEdgesMid() const {return _edge_mid;}
+
+    /**
+        * @brief Middle point for i-th edge
+        * @param i Edge number
+        * @return Const copy of i-th edge middle point
+    */
     const Point& GetEdgeMid(int i) const {return _edge_mid[i];}
 
-    const std::vector<Point>& GetEdgeOrt() const {return _edge_ort;}
+    /**
+        * @brief Ort vectors for all edges
+        * @return Const copy of orts vector
+    */
+    const std::vector<Point>& GetEdgesOrt() const {return _edge_ort;}
+
+    /**
+        * @brief Local ort vector for i-th edge
+        * @param i Edge number
+        * @return Const copy of local edge ort vector
+    */
     const Point& GetEdgeOrt(int i) const {return _edge_ort[i];} 
 
+    /**
+        * @brief Edges numbers forming i-th cell
+        * @param i Cell number
+        * @return Const copy of edges numbers vector
+    */
     const std::array<int, SurfMesh<CellType>::_NVertex>& GetCellEdges(int i) const {return _cell_edges[i];}
+    
+    /**
+        * @brief j-th edge number from edges list for i-th cell
+        * @param i Cell number
+        * @param j Edge number (serial)
+        * @return Edge number
+        * @note returns (-5) for empty edge
+    */
     int GetCellEdge(int i, int j) const {return _cell_edges[i][j];}
 
-
+    /**
+        * @brief Cell edge direction coincidence index
+        * @param i Cell number
+        * @param j Edge number (serial)
+        * @return Direction index
+        * @note 1 - same, -1 - opposite, 0 - empty edge
+    */
     int GetCellEdgeDirIndx(int i, int j) const {return _cell_edge_dirIndex[i][j];}
 
 
 
 
-    double GetPointsDist(int pntA, int pntB) const {
-        return dist(_points[pntA].GetCoord(), _points[pntB].GetCoord());
+
+
+
+    /**
+        * @brief Euclidean distance between two mesh points
+        * @param pntAN First point number
+        * @param pntBN First point number
+        * @return Distance
+    */
+    double GetPointsDist(int pntAN, int pntBN) const {
+        return dist(_points[pntAN].GetCoord(), _points[pntBN].GetCoord());
     }
 
+    /**
+        * @brief Euclidean length of i-th edge
+        * @param i Edge number
+        * @return Edge length
+    */
     double GetEdgeLen(int i) const {return GetPointsDist(_edges[i][0], _edges[i][1]);}
 
 
 
     /**
-        * @brief Export surf mesh to vtk-file format.
-        * @param filename vtk-file
+        * @brief Cells numbers adjacent along an edge
+        * @param i Cell number
+        * @param j Cell side number (serial)
+        * @return Const copy of cells numbers vector
+        * @note for empte edge / only in its own cell returns (-5)
+    */
+    const std::vector<int>& GetCellNghbsByEdge(int i, int j) const {
+        return _cell_nghb_by_edge[i][j];
+    }
+    
+
+
+
+
+
+    /**
+        * @brief Export rwg-surf mesh to vtk-file format
+        * @param filename Vtk-file (full path)
     */
     void ExportRwgfMeshToVTK(const std::string& filename);
 };
@@ -341,9 +473,6 @@ void RwgSurfMesh<CellType>::FillUniqueEdges()
         _edge_ort[i] = (Point(B) - Point(A)) * (1. / dl);
     }
 }
-
-
-
 
 
 //===========================================================
