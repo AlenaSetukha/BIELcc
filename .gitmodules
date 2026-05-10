@@ -1,3 +1,0 @@
-[submodule "extern/yaml-cpp"]
-	path = extern/yaml-cpp
-	url = https://github.com/jbeder/yaml-cpp
