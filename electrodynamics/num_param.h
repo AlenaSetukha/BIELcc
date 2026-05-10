@@ -8,31 +8,23 @@ namespace bielcc {
 //--------Numerical parameters of the problem----------------
 //===========================================================
 /**
-    * eps - integral calculation accuracy
-    * rs - smoothing radius for the cell integral kernel function
-    * rs_seg - smoothing radius for the segment integral kernel function
-    * analytic_calc - dist to a highlighting singularity (relative do cell diam)
-    * n_start - starting partition on the cell
-    * n_start_seg - starting partition on the segment
-    * p_max - limit partition on the cell (2^(p_max) cells)
-    * p_max_seg - limit partition on the segment (2^(p_max_seg) segments)
-    *
-    * 
-    * k - number of time steps (optional)
-    * T - time interval (optional)
-    * dt - time step (optional)
-    * kappa - problem parameter (optional)
-    * M - problem parameter (optional)
-    * 
-    * ==========================================================================
-    * The smoothing radius can be specified as a fraction of each cell / grid
-    * step,  depending on applicability.
- */
-
- /**
-  * @brief Global numerical parameters for certain problem.
-  * 
-  */
+    * @brief Global numerical parameters for certain problem.
+    * @param eps integral calculation accuracy
+    * @param rs smoothing radius for the cell integral kernel function (relative to small cell)
+    * @param rs_seg smoothing radius for the segment integral kernel function (relative to small cell)
+    * @param analytic_calc dist to a highlighting singularity (relative do cell diam) (relative to mesh step)
+    * @param n_start starting partition on the cell
+    * @param n_start_seg starting partition on the segment
+    * @param p_max limit partition on the cell (2^(p_max) cells)
+    * @param p_max_seg limit partition on the segment (2^(p_max_seg) segments)
+    * @param k number of time steps (optional)
+    * @param T time interval (optional)
+    * @param dt time step (optional)
+    * @param kappa problem parameter (optional)
+    * @param M problem parameter (optional)
+    * @note The smoothing radius can be specified as a fraction of
+    * each cell / cell 2-nd layer (depending on applicability)
+*/
 struct NumParam {
     double eps;
     double rs, rs_seg;

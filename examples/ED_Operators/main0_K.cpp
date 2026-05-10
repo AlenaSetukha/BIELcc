@@ -15,6 +15,7 @@
 #include "num_param.h"
 #include "element_geom.h"
 #include "kernel_lib.h"
+#include "constants.h"
 
 
 /**
@@ -22,7 +23,7 @@
     * рассеяния:
     *               K = rot rot [surf_int(j * F)]
     *                   F = e^{ikr} / (4 pi r)
-    * Ток должен лежить в плоскости ячейки(если в операторе присутствует
+    * Ток должен лежать в плоскости ячейки (если в операторе присутствует
     * контурный интеграл).
     * 
     * 
@@ -32,12 +33,12 @@
     * Использовать: при расчете поля в ближней зоне.
     * Обязательная инициализация следующих параметров: 
     *       const double IntegralAccuracy = 0.00001;
-    *       const double SmoothingR_r = 0.0005;                // relative to cell diam h
-    *       const double SmoothingRSeg_r = 0.0005;             // relative to cell diam h
-    *       const int NCellStart = 8; 
-    *       const int NSegStart = 10;
-    *       const int PMax = 5;                                // 2^{PMax} steps in surface integration
-    *       const int PMaxSeg = 5;                             // 2^{PMaxSeg} steps in segment integration
+    *       const double SmoothingR_r = 0.5;                   // relative to small cell diam h2
+    *       const double SmoothingRSeg_r = 0.5;                // relative to small cell diam h2
+    *       const int NCellStart = 20; 
+    *       const int NSegStart = 30;
+    *       const int PMax = 2;                                // 2^{PMax} steps in surface integration
+    *       const int PMaxSeg = 2;                             // 2^{PMaxSeg} steps in segment integration
     * 
     * 
     * 
@@ -119,24 +120,44 @@ int main(int argc, char **argv)
                                {0., 2., 0.}};
 
 
-    const double x[3] = {10., 10., 10.};      // all three options will match
-    //const double x[3] = {2., 1.5, 0.};      // K_RotRot_Far won't work right in this case
+    // const double x[3] = {10., 10., 10.};      // all three options will match
+    const double x[3] = {2., 1.5, 0.};      // K_RotRot_Far will not give the correct result in this case
 
 
-
+    
     //==============================================
-    //--------Global numerical parameters-----------
+    //-------Global numerical parameters------------
     //==============================================
-    const double IntegralAccuracy = 0.00001;
-    const double SmoothingR_r = 0.0005;                // relative to cell diam h
-    const double SmoothingRSeg_r = 0.0005;             // relative to cell diam h
-    const double AnalyticCalcR = 3.0;                  // relative to cell diam h
-    const int NCellStart = 8;                       
-    const int NSegStart = 10;
-    const int PMax = 5;                                // 2^{PMax} steps in surface integration
-    const int PMaxSeg = 5;                             // 2^{PMaxSeg} steps in segment integration
-    NumParam num_param(IntegralAccuracy, SmoothingR_r, SmoothingRSeg_r,
-                AnalyticCalcR, NCellStart, NSegStart, PMax, PMaxSeg);
+    const double IntegralAccuracy = Calculation_Constants::INTEGRAL_ACCURACY;
+    const double SmoothingR_r = Calculation_Constants::SMOOTHING_DIST_SURF_INT * 0.5;         // relative to small cell step h2
+    const double SmoothingRSeg_r = Calculation_Constants::SMOOTHING_DIST_SEG_INT * 0.5;       // relative to small cell step h2
+    const double AnalyticCalcR = Calculation_Constants::ANALYTIC_CALC_DIST;             // relative to grid step h
+    const int NCellStart = Calculation_Constants::START_CELL_SPLIT * 50;                       
+    const int NSegStart = Calculation_Constants::START_SEG_SPLIT * 50;
+    const int PMaxCell = Calculation_Constants::PMAX_CELL_SPLIT;                        // 2^{PMax} steps in surface integration
+    const int PMaxSeg = Calculation_Constants::PMAX_SEG_SPLIT;                          // 2^{PMaxSeg} steps in segment integration
+    
+    std::cout << "Numerical values ​​of calculation parameters" << std::endl;
+    std::cout << "Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
+    std::cout << "Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
+    std::cout << "Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
+    std::cout << "Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
+    std::cout << "Starting cell split: " << NCellStart << std::endl;
+    std::cout << "Starting segment split: " << NSegStart << std::endl;
+    std::cout << "Limit cell split (2^{P}): " << PMaxCell << std::endl;
+    std::cout << "Limit segment split (2^{P}): " << PMaxSeg << std::endl;
+    std::cout << std::endl;
+ 
+
+    
+    NumParam num_param(IntegralAccuracy,
+                        SmoothingR_r,
+                        SmoothingRSeg_r,
+                        AnalyticCalcR,
+                        NCellStart,
+                        NSegStart,
+                        PMaxCell,
+                        PMaxSeg);
 
 
     const std::complex<double> k = std::complex<double>(1., 0.);
@@ -151,14 +172,14 @@ int main(int argc, char **argv)
     //---------------(расчет поля)------------------
     //==============================================
     std::complex<double> res[3];
-    K_RotRot_Near_Smooth(j, x, rut1, num_param, k, res);
+    K_RotRot_Near_Smooth(j, x, rut1, num_param, k, res);            // x on cell -> smooth (both terms)
     std::cout << "Test1. K[] со сглаживанием." << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
 
     std::complex<double> res1[3], res2[3];
-    K_RotRot_Near_Smooth(j, x, rut2, num_param, k, res1);
-    K_RotRot_Near_Smooth(j, x, rut3, num_param, k, res2);
+    K_RotRot_Near_Smooth(j, x, rut2, num_param, k, res1);           // x not on cell -> no smooth
+    K_RotRot_Near_Smooth(j, x, rut3, num_param, k, res2);           // x on cell -> smooth (both terms)
     std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
 
@@ -180,7 +201,7 @@ int main(int argc, char **argv)
 
     std::complex<double> res13[3], res23[3];
     K_RotRot_HS(j, x, rut2, num_param, k, res13);
-    K_RotRot_HS(j, x, rut3, num_param, k, res23);
+    K_RotRot_HS(j, x, rut3, num_param, k, res23); 
     std::cout << "      [3][3] + [3][3]: " << res13[0] + res23[0] << " " << res13[1] + res23[1] << " " << res13[2] + res23[2] << std::endl;
     
 
@@ -213,7 +234,7 @@ int main(int argc, char **argv)
     //-------(вычисление поля в дальней зоне)-------
     //==============================================
     K_RotRot_Far(j, x, rut1, num_param, k, res);
-    std::cout << "Test4. K в дальней зоне" << std::endl;
+    std::cout << "Test4. K в дальней зоне (на ячейке не сработает!)" << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
     K_RotRot_Far(j, x, rut2, num_param, k, res1);

@@ -19,34 +19,46 @@ struct IO_VTK {
     //------------Reading data from vtk-files--------------------
     //===========================================================
     /**
-        * @brief Reading points coordinates from file
-        * @param filename name of file
-        * @result list of 3D-vectors.
-        * @note In file should be: POINTS 400 double {...}
+        * @brief Reading 3D-vector list from vtk file
+        * @param filename Name of file (full path)
+        * @result List of 3D-vectors
+        * @note In file should be: POINTS N double {...}
     */
     std::vector<std::array<double, 3>> ReadVecs(const std::string& filename);
+    /**
+        * @brief Reading 3D-vector list from vtk file
+        * @param filename Name of file (full path)
+        * @param vecs Double-vals vectors (result)
+        * @note Memory must be allocated correctly: [num_vecs][3]
+        * @note In file should be: POINTS N double {...}
+    */
+    void ReadVecs(const std::string& filename, double** vecs);
 
 
     //===========================================================
     //------------Reading data from vtk-files--------------------
     //===========================================================
     /**
-        * @brief Reading complex surface currents from vtk-file.
-        * @param filename name of file
-        * @result list of 3D-vectors (complex-vals)
+        * @brief Reading complex 3D-vector list from vtk-file
+        * @param filename Name of file (full path)
+        * @result List of 3D-vectors (complex-vals)
         * @note In file should be: VECTORS real_part double {...} VECTORS image_part double {...}
     */
     std::vector<std::array<std::complex<double>, 3>> ReadVecs_Cmplx(const std::string& filename);
 
 
     /**
-        * @brief Reading complex surface currents from vtk-file.
-        * @param filename name of file
-        * @param vecs cmplx-vals vectors (result)
-        * @note Memory must be allocated correctly: [num_frm][3]
+        * @brief Reading complex 3D-vector list from vtk-file
+        * @param filename Name of file (full path)
+        * @param vecs Cmplx-vals vectors (result)
+        * @note Memory must be allocated correctly: [num_vecs][3]
+        * @note In file should be: VECTORS real_part double {...} VECTORS image_part double {...}
     */
     void ReadVecs_Cmplx(const std::string& filename,
                                 std::complex<double>** vecs);
+
+
+
 
 
 
@@ -56,26 +68,26 @@ struct IO_VTK {
     //===========================================================
     /**
         * @brief Writing list of 3D-vectors to vtk-file.
-        * @param filename name of vtk-file 
-        * @param vals writing data
+        * @param filename Name of file (full path)
+        * @param vals Writing data
     */
     void WriteVecs(const std::string& filename, 
                     const std::vector<std::array<double, 3>>& vals);
 
     /**
         * @brief Writing list of N 3D-vectors to vtk-file.
-        * @param filename name of vtk-file
-        * @param N length of vals
-        * @param vals writing data [N][3]
+        * @param filename Name of file (full path)
+        * @param N Length of vals
+        * @param vals Writing data [N][3]
     */
     void WriteVecs(const std::string& filename, int N, const double** vals);
 
 
     /**
         * @brief Writing points and double field-vals in vtk-file.
-        * @param filename name of vtk-file (path)
-        * @param points list of points
-        * @param field_vectors field-vals (3D-vectors) in points
+        * @param filename Name of file (full path)
+        * @param points List of points
+        * @param field_vectors Field-vals (3D-vectors) in points
     */
     void WritePntsWithField_D(const std::string& filename,
                     const std::vector<std::array<double, 3>>& points,
@@ -84,10 +96,10 @@ struct IO_VTK {
 
     /**
         * @brief Writing points and double field-vals in vtk-file.
-        * @param filename name of vtk-file (path)
-        * @param points list of points
-        * @param NF field_vectors length
-        * @param field_vectors field-vals (3D-vectors) in points
+        * @param filename Name of file (full path)
+        * @param points List of points
+        * @param NF Length of field_vectors
+        * @param field_vectors Field-vals (3D-vectors) in points
     */
     void WritePntsWithField_D(const std::string& filename,
                             const std::vector<std::array<double, 3>>& points,
@@ -95,9 +107,9 @@ struct IO_VTK {
 
     /**
         * @brief Writing points and complex field-vals in vtk-file.
-        * @param filename name of vtk-file (path)
-        * @param points list of points
-        * @param field_vectors field-vals (3D-vectors) in points
+        * @param filename Name of file (full path)
+        * @param points List of points
+        * @param field_vectors Field-vals (3D-vectors) in points
     */
     void WritePntsWithField_C(const std::string& filename,
             const std::vector<std::array<double, 3>>& points,
@@ -107,10 +119,10 @@ struct IO_VTK {
 
     /**
         * @brief Writing points and complex field-vals in vtk-file.
-        * @param filename name of vtk-file (path)
-        * @param points list of points
-        * @param NF field_vectors length
-        * @param field_vectors complex field-vals (3D-vectors) in points
+        * @param filename Name of file (full path)
+        * @param points List of points
+        * @param NF Field_vectors length
+        * @param field_vectors Complex field-vals (3D-vectors) in points
     */
     void WritePntsWithField_C(const std::string& filename,
                     const std::vector<std::array<double, 3>>& points,

@@ -40,12 +40,8 @@ include_directories(io)
 include_directories(mesh)
 
 
-include_directories(extensions/epr/)
-include_directories(extensions/em_problems/)
 
 
-### include_directories(extern/yaml-cpp/include)
-### add_subdirectory(extern/yaml-cpp)
 
 
 set(SOURCE
@@ -53,7 +49,6 @@ set(SOURCE
     electrodynamics/material.cpp
     electrodynamics/num_param.cpp
     electrodynamics/radiation_source.cpp
-    extensions/em_problems/get_j.cpp
     geometry/element_geom.cpp
     integrators/integral_param.cpp
     integrators/integrals_analytic.cpp
@@ -66,32 +61,14 @@ set(SOURCE
 add_library(pcac_lib STATIC ${SOURCE})
 
 
-add_executable(main0_j ../examples/PEC/main0_PEC_BLAS.cpp)
-add_executable(main1_field ../examples/PEC/pp_fieldCalc.cpp)
-add_executable(main2_epr ../examples/PEC/pp_epr.cpp)
 
 
 
-foreach(TARGET main0_j main1_field main2_epr)
-    if(OPENMP_FOUND)
-        target_link_libraries(${TARGET} PUBLIC OpenMP::OpenMP_CXX)
-    endif()
-    target_link_libraries(${TARGET} PUBLIC pcac_lib)
-    target_link_libraries(${TARGET} PRIVATE lapacke lapack blas)
-    target_link_libraries(${TARGET} PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
-    target_link_libraries(${TARGET} PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
-endforeach()
+add_executable(main0 ../examples/PEC/main0_field_test.cpp)
 
 
-# Custom target для последовательного запуска
-add_custom_target(run_all
-    COMMAND ${CMAKE_COMMAND} -E echo "Running main0..."
-    COMMAND main0_j
-    COMMAND ${CMAKE_COMMAND} -E echo "Running main1..."
-    COMMAND main1_field
-    COMMAND ${CMAKE_COMMAND} -E echo "Running main2..."
-    COMMAND main2_epr
-    DEPENDS main0_j main1_field main2_epr
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+target_link_libraries(main0 PUBLIC pcac_lib)
+target_link_libraries(main0 PRIVATE lapacke lapack blas)
+target_link_libraries(main0 PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
+target_link_libraries(main0 PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
 

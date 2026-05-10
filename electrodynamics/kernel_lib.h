@@ -217,6 +217,34 @@ void F_SimplePot_H(const double *x, const double *y,
 }
 
 
+
+
+//===========================================================
+//--------------Simple layer potential kernel----------------
+//--------for the Helmholtz equation mult on nu--------------
+//===========================================================
+/**
+    * @brief F = nu * e^ik|x - y| / |x - y|
+    * @details Kernel of the simple layer potential (Helmholtz) mult on nu vector
+    * @param x First arg
+    * @param y Second arg
+    * @param ker_param Parameters of the integrand
+    * @param res Vector [3] res value
+    * @note Vector for mult (nu) must be in ker_param.vec_dbl[3]
+*/
+template<typename KType>
+void nuF_SimplePot_H(const double *x, const double *y,
+                const KernelParam<KType> &ker_param, std::complex<double> *res)
+{
+    double r = dist(x, y);
+    std::complex<double> FSP_H[1]{};
+    F_SimplePot_H(x, y, ker_param, FSP_H);
+    res[0] = ker_param.vec_dbl[0] * FSP_H[0];
+    res[1] = ker_param.vec_dbl[1] * FSP_H[0];
+    res[2] = ker_param.vec_dbl[2] * FSP_H[0];
+}
+
+
 //===========================================================
 //--------------Simple layer potential kernel----------------
 //--------------for the Helmholtz equation - 1---------------
@@ -266,7 +294,7 @@ void F_SimplePot_Hm1(const double *x, const double *y,
 */
 template<typename KType>
 void F_GradSimplePot_H(const double *x, const double *y,
-                           const KernelParam<KType> &ker_param,
+                    const KernelParam<KType> &ker_param,
                               std::complex<double> *res)
 {
     double r = dist(x, y);
@@ -334,14 +362,13 @@ void F_GradSimplePot_Hm1(const double *x, const double *y,
 //---------------for the Helmholtz equation------------------
 //===========================================================
 /**
-    * @brief F = (n(y) * (x - y) / |x - y|^3) * (e^ik|x - y|
-    * - ikr e^ik|x - y|)
+    * @brief F = (n(y) * (y - x) / |x - y|^3) * e^ik|x - y| * (ikr - 1)
     * @details Double layer potential kernel for the
     * Helmholtz equation
     * @param x First arg
     * @param y Second arg
-    * @param res Scalar res value
     * @param ker_param Parameters of the integrand
+    * @param res Scalar res value
     * @note d / dn ( LayerPotHelmholtz ). Vector n should be
     * passed through ker_param.n[3]
 */
@@ -352,15 +379,45 @@ void F_DoublePot_H(const double *x, const double *y,
 {
     double r = dist(x, y);
     double diff[3];
-    diff[0] = x[0] - y[0], diff[1] = x[1] - y[1], diff[2] = x[2] - y[2];
+    diff[0] = y[0] - x[0], diff[1] = y[1] - x[1], diff[2] = y[2] - x[2];
     std::complex<double> ikr = std::complex<double>(0., r) * ker_param.k;
 
-    res[0] = scal_prod(ker_param.n, diff) * exp(ikr) * (1. - ikr);
+    res[0] = scal_prod(ker_param.n, diff) * exp(ikr) * (ikr - 1.);
 
     double t = r / ker_param.smoothR;
     res[0] *= (t < 1) * (3 - 2 * t) / (r * sqr(ker_param.smoothR)) +
                                                     (t >= 1) / (sqr(r) * r);
 }
+
+
+
+//===========================================================
+//--------------Double layer potential kernel----------------
+//---------------for the Helmholtz equation------------------
+//===========================================================
+/**
+    * @brief F = n * F_DoublePot_H
+    * @details Double layer potential kernel for the
+    * Helmholtz equation multiplied by n
+    * @param x first arg
+    * @param y second arg
+    * @param ker_param parameters of the integrand
+    * @param res vector [3] res value
+    * @note n * d / dn ( LayerPotHelmholtz ). Vector n should be
+    * passed through ker_param.n[3]
+*/
+template<typename KType>
+void nF_DoublePot_H(const double *x, const double *y,
+                        const KernelParam<KType> &ker_param,
+                          std::complex<double> *res)
+{
+    std::complex<double> DSP_H[1]{};
+    F_DoublePot_H(x, y, ker_param, DSP_H);
+    res[0] = ker_param.n[0] * DSP_H[0];
+    res[1] = ker_param.n[1] * DSP_H[0];
+    res[2] = ker_param.n[2] * DSP_H[0];
+}
+
 
 
 
@@ -385,10 +442,10 @@ void F_DoublePot_H(const double *x, const double *y,
     * 
     * f2 = 3 / r^3 - (3ik) / r^2 - k^2 / r
     * @details Rot_x Rot_x of a simple layer potential (Helmholtz)
-    * @param x First arg
-    * @param y Second arg
-    * @param ker_param Parameters of the integrand (currents vectors)
-    * @param res Vector [3] res value
+    * @param x first arg
+    * @param y second arg
+    * @param ker_param parameters of the integrand (currents vectors)
+    * @param res vector [3] res value
     * @note Used as an integrand for K[] operator in far field zone (x out of the cell).
     * Is an analogue of the Hertzian dipole potential kernel function.
     * Vector j_vec should be passed through ker_param.current[3]
@@ -442,10 +499,10 @@ void F_RotRotSimplePot_H(const double *x, const double *y,
 //===========================================================
 /**
     * @brief F = (x - y) / |x - y|^2
-    * @param x First arg
-    * @param y Second arg
-    * @param ker_param Parameters of the integrand
-    * @param res Vector [3] res value
+    * @param x first arg
+    * @param y second arg
+    * @param ker_param parameters of the integrand
+    * @param res vector [3] res value
 */ 
 template<typename KType>
 void F_xmyDivr2(const double *x, const double *y,
@@ -474,9 +531,9 @@ void F_xmyDivr2(const double *x, const double *y,
 //===========================================================
 /**
     * @brief F = E0 * e^{ik_vec x} * ort = E_inc * ort
-    * @param x Cal point
-    * @param ker_param Parameters of the integrand
-    * @param res Scalar res value
+    * @param x calloc point
+    * @param ker_param parameters of the integrand
+    * @param res scalar res value
     * @note k_vec should be passed through ker_param.vec_cmplx[3], 
     * ort - ker_param.ort[3]
 */ 
@@ -506,9 +563,10 @@ void F_EincDotOrt(const double *x, const KernelParam<KType> &ker_param,
 //===========================================================
 /**
     * @brief Kernel averaging for surface divergence (far from edge)
-    * @param x First arg
-    * @param y Second arg
-    * @param res Vector [3] res value
+    * @param x first arg
+    * @param y second arg
+    * @param ker_param parameters of the integrand
+    * @param res vector [3] res value
     * @note eps_edge - criterion of proximity to the edge. "Far"
     * means dist(x, edge) > 3 * eps_edge
 */
@@ -533,11 +591,12 @@ void Ker_AverDiv(const double *x, const double *y,
 //===========================================================
 /**
     * @brief Kernel averaging for shallow divergence (near the edge)
-    * @param x First arg
-    * @param y Second arg
-    * @param res Vector [3] res value
+    * @param x first arg
+    * @param y second arg
+    * @param ker_param parameters of the integrand
+    * @param res vector [3] res value
     * @note eps_edge - criterion of proximity to the edge. "Near"
-        * means dist(x, edge) < 3 * eps_edge
+    * means dist(x, edge) < 3 * eps_edge
 */                        
 template<typename KType>                                   
 void Ker_AverDiv_NearEdge(const double *x, const double *y,
@@ -561,9 +620,10 @@ void Ker_AverDiv_NearEdge(const double *x, const double *y,
 /**
     * @brief Basic averaging function
     * @details psi(r = |x - y|) = e^(r^2 / eps^2) / (pi * eps^2)
-    * @param x First var
-    * @param y Second var
-    * @param res Vector [3] res value
+    * @param x first var
+    * @param y second var
+    * @param eps epsilon
+    * @param res vector [3] res value
 */                                                             
 inline double Ker_BasicAverFunc(const double *x, const double *y,
                                          const double eps)

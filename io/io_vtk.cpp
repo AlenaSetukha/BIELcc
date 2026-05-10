@@ -103,6 +103,92 @@ std::vector<std::array<double, 3>> IO_VTK::ReadVecs(const std::string& filename)
     return points;
 }
 
+void IO_VTK::ReadVecs(const std::string& filename, double** vecs)
+{
+    std::ifstream file(filename);
+    
+    if (!file.is_open()) {
+        throw std::runtime_error("ReadVecs .vtk. Cannot open file: " + filename);
+    }
+    
+    std::string line;
+    int line_num = 0;
+    
+    try {
+        // Пропустить заголовок (первые 3 строки)
+        for (int i = 0; i < 3; ++i) {
+            if (!std::getline(file, line)) {
+                throw std::runtime_error("File is too short (missing header)");
+            }
+            line_num++;
+        }
+        
+        // Прочитать DATASET строку (пропускаем пустые строки и комментарии)
+        do {
+            if (!std::getline(file, line)) {
+                throw std::runtime_error("Failed to read DATASET line");
+            }
+            line_num++;
+        } while (line.empty() || line[0] == '#');
+        
+        if (line.find("DATASET") == std::string::npos) {
+            throw std::runtime_error("Expected DATASET keyword at line " + 
+                                   std::to_string(line_num));
+        }
+        
+        // Прочитать POINTS строку (пропускаем пустые строки)
+        do {
+            if (!std::getline(file, line)) {
+                throw std::runtime_error("Failed to read POINTS line");
+            }
+            line_num++;
+        } while (line.empty() || line[0] == '#');
+        
+        std::istringstream iss(line);
+        std::string keyword, data_type;
+        int num_points;
+        
+        iss >> keyword >> num_points >> data_type;
+        
+        if (keyword != "POINTS") {
+            throw std::runtime_error("Expected POINTS keyword at line " + 
+                                   std::to_string(line_num));
+        }
+        
+        if (num_points <= 0) {
+            throw std::runtime_error("Invalid number of points: " + 
+                                   std::to_string(num_points));
+        }
+        
+        // Прочитать координаты точек
+        for (int i = 0; i < num_points; ++i) {
+            // Пропускаем пустые строки и комментарии
+            do {
+                if (!std::getline(file, line)) {
+                    throw std::runtime_error("Unexpected end of file at point " + 
+                                           std::to_string(i));
+                }
+                line_num++;
+            } while (line.empty() || line[0] == '#');
+            
+            std::istringstream coord_stream(line);
+            double x, y, z;
+            
+            if (!(coord_stream >> x >> y >> z)) {
+                throw std::runtime_error("Failed to parse coordinates at line " + 
+                                       std::to_string(line_num) + 
+                                       " (point " + std::to_string(i) + ")");
+            }
+            vecs[i][0] = x, vecs[i][1] = y, vecs[i][2] = z;
+        }
+        
+    } catch (const std::exception& e) {
+        throw std::runtime_error(std::string("Error reading VTK file: ") + e.what());
+    }
+    
+    file.close();
+}
+
 
 
 

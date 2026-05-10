@@ -23,7 +23,8 @@ namespace bielcc {
 //---------in the near zone using smoothing kernel-----------
 //===========================================================
 /**
-    * Fully numerical calculation of the near-field integral
+    * @brief Near-field integral operator K[cell, j_vec] (just smoothing)
+    * @details Fully numerical calculation of the near-field integral
     * operator
     *        K[cell, j_vec](x) = -curv_int(gradx F) + k^2 * surf_int(F),
     * where F = eikr/r.
@@ -33,11 +34,8 @@ namespace bielcc {
     * integration over dy.
     * Note: num_param.rs - the integral smoothing radius
     * relative to the second-level cell size (~0.5 - 2)
-*/
-
-/**
-    * @brief Near-field integral operator K[cell, j_vec] (just smoothing)
-    * @param j argument vector [3]
+    * 
+    * @param j argument vector [3] (constant on cell)
     * @param x calc point
     * @param cell Integration cell [4 / 3][3]
     * @param num_param Numerical parameters for integration
@@ -93,7 +91,9 @@ void K_RotRot_Near_Smooth(const JType* j, const double* x, const double (&cell)[
 //-----------------highlitghting singularity-----------------
 //===========================================================
 /**
-    * Semi-analytical calculation of the near-field integral
+    * @brief Near-field semi-analytical integral operator K[cell, j_vec] (highlight singularity).
+    * Smoothing in curv integral
+    * @details Semi-analytical calculation of the near-field integral
     * operator
     *        K[cell, j_vec](x) = -curv_int(gradx F) + k^2 * surf_int(F),
     * where F = eikr / (4pi r).
@@ -105,12 +105,7 @@ void K_RotRot_Near_Smooth(const JType* j, const double* x, const double (&cell)[
     * integration over dy.
     * Note: num_param.rs - the integral smoothing radius
     * relative to the second-level cell size (~0.5 - 2)
-*/
-
-/**
-    * @brief Near-field semi-analytical integral operator K[cell, j_vec] (highlight singularity).
-    * Smoothing in curv integral
-    * @param j argument vector [3]
+    * @param j argument vector [3] (constant on cell)
     * @param x calc point
     * @param cell Integration cell [4 / 3][3]
     * @param num_param Numerical parameters for integration
@@ -155,7 +150,9 @@ void K_RotRot_HS(const JType* j, const double* x, const double (&cell)[CellPoint
 //-----------------highlitghting singularity-----------------
 //===========================================================
 /**
-    * Semi-analytical calculation of the near-field integral
+    * @brief Near-field semi-analytical integral operator K[cell, j_vec] in 
+    * collocation points. No smoothing in curv integral.
+    * @details Semi-analytical calculation of the near-field integral
     * operator
     *        K[cell, j_vec](x) = -curv_int(gradx F) + k^2 * surf_int(F),
     * where F = eikr / (4pi r).
@@ -167,12 +164,7 @@ void K_RotRot_HS(const JType* j, const double* x, const double (&cell)[CellPoint
     * integration over dy.
     * Note: num_param.rs - the integral smoothing radius
     * relative to the second-level cell size (~0.5 - 2)
-*/
-
-/**
-    * @brief Near-field semi-analytical integral operator K[cell, j_vec] in 
-    * collocation points. No smoothing in curv integral.
-    * @param j argument vector [3]
+    * @param j argument vector [3] (constant on cell)
     * @param x collocation point
     * @param cell Integration cell [4 / 3][3]
     * @param num_param Numerical parameters for integration
@@ -209,10 +201,20 @@ void K_RotRot_HS_Colloc(const JType* j, const double* x, const double (&cell)[Ce
 
 
 
+
+
+
+
+
+//===========================================================
+//-----------Operator K = Rot Rot[surf integral]-------------
+//------------------in the near zone using-------------------
+//---------highlitghting singularity in both terms-----------
+//===========================================================
 /**
     * @brief Near-field semi-analytical integral operator K[cell, j_vec] in 
     * collocation points. Highlighting singularity in both terms.
-    * @param j argument vector [3]
+    * @param j argument vector [3] (constant on cell)
     * @param x collocation point
     * @param cell Integration cell [4 / 3][3]
     * @param num_param Numerical parameters for integration
@@ -257,7 +259,8 @@ void K_RotRot_HS2_Colloc(const JType* j, const double* x, const double (&cell)[C
 //--------------------in the far zone------------------------
 //===========================================================
 /**
-    * Fully numerical calculation of the far-field integral
+    * @brief Far-field integral operator K[cell, j_vec]. No smoothing.
+    * @details Fully numerical calculation of the far-field integral
     * operator
     *           K[cell, j_vec](x) = Rot Rot (surf_int)
     *              K[cell, j_vec](x) = surf_int(Kfar)
@@ -269,13 +272,7 @@ void K_RotRot_HS2_Colloc(const JType* j, const double* x, const double (&cell)[C
     *           f2 = 3 / r^3 - (3ik) / r^2 - k^2 / r.
     * Calculation at fixed point x. Rectangle formula, 
     * integration over dy.
-*/
-
-
-
-/**
-    * @brief Far-field integral operator K[cell, j_vec]. No smoothing.
-    * @param j argument vector [3]
+    * @param j argument vector [3] (constant on cell)
     * @param x calc point
     * @param cell Integration cell [4 / 3][3]
     * @param num_param Numerical parameters for integration

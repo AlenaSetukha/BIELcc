@@ -19,6 +19,7 @@ namespace bielcc {
     * @param ort complementary vector (optional)
     * @param current surface current vector (optional) (complex)
     * @param freq frequency
+    * @note smoothR changes during adaptive integration
 */
 template<typename KType>
 struct KernelParam {
@@ -35,10 +36,10 @@ struct KernelParam {
 
     KernelParam() = default;
     /**
-     * @brief Integrand parameters
-     * @param k_ wave number
-     * @param smoothR_ smoothing radius (absolute value)
-     */
+        * @brief Integrand parameters
+        * @param k_ wave number
+        * @param smoothR_ smoothing radius (absolute value)
+    */
     KernelParam(KType k_, double smoothR_):
                     smoothR(smoothR), k(k_) {};
     KernelParam(const KernelParam &obj);

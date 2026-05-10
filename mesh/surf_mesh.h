@@ -353,10 +353,10 @@ static bool endsWith(const std::string& str, const std::string& suffix) {
 template<typename CellType>
 void SurfMesh<CellType>::ReadFromFile(const std::string& filename) {
     if (endsWith(filename, ".dat")) {
-        std::cout << "Чтение .dat файла" << std::endl;
+        // std::cout << "Чтение .dat файла" << std::endl;
         this->ReadFromDatFile(filename);
     } else if (endsWith(filename, ".vtk")) {
-        std::cout << "Чтение .vtk файла" << std::endl;
+        // std::cout << "Чтение .vtk файла" << std::endl;
         this->ReadFromVtkFile(filename);
     } else {
         throw std::runtime_error("File type error: ReadFromFile");

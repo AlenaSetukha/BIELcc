@@ -35,7 +35,7 @@ namespace bielcc {
 template <typename P, typename KType>
 void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        const KernelParam<KType>& ker_param, const IntegralParam& int_param,
+        KernelParam<KType>& ker_param, const IntegralParam& int_param,
         P* res)
 {
     int p_n;
@@ -76,10 +76,11 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
             break;
         }
 
-        n = n * 2;
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
 
@@ -113,7 +114,7 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
 template <typename P, typename KType>
 void IntegralUniversalSegPnt(const double* a, const double* b,
         void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                              const KernelParam<KType>& ker_param,
+                                    KernelParam<KType>& ker_param,
                            const IntegralParam& int_param, P* res)
 {
     int p_n;
@@ -153,10 +154,11 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
             break;
         }
 
-        n = n * 2;
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
 

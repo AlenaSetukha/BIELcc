@@ -7,7 +7,11 @@
 //===========================================================
 namespace bielcc {
 /** 
-     * @brief Class of numerical parameters for integration.
+    * @brief Class of numerical parameters for integration.
+    * @param _idim dimension of the integrand
+    * @param _NStart start partition of the integration domain
+    * @param _PMax max partition of the integration domain (2^{PMax})
+    * @param _epsAccuracy accuracy of integral calculation
  */
 class IntegralParam {
 private:

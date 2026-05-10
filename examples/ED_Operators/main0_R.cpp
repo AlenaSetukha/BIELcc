@@ -13,6 +13,7 @@
 #include "num_param.h"
 #include "element_geom.h"
 #include "kernel_lib.h"
+#include "constants.h"
 
 
 /**
@@ -38,14 +39,18 @@
     * 
     * 
     *       - R_Rot_Smooth - оператор R[] со сглаживанием в произвольной точке.
-    * Использовать: при расчете поля.
+    * Использовать: при расчете поля. ВНИМАНИЕ: гиперсингулярный интеграл, считаеть аккуратно.
     * Обязательная инициализация следующих параметров:
     *       const double IntegralAccuracy = 0.00001;
-    *       const double SmoothingR_r = 0.0005;                 // relative to cell diam h
-    *       const int NCellStart = 8;
+    *       const double SmoothingR_r = 8.;                     // relative to small cell (h2)
+    *       const int NCellStart = 40;
     *       const int NSegStart = 10;
-    *       const int PMax = 10;                                // 2^{PMax} steps in surface integration
-    *       const int PMaxSeg = 10;                             // 2^{PMaxSeg} steps in segment integration
+    *       const int PMax = 1;                                // 2^{PMax} steps in surface integration
+    *       const int PMaxSeg = 1;                             // 2^{PMaxSeg} steps in segment integration
+    * 
+    * Важно: адаптивное интегрирование лучше не использовать, ячейку сразу бить 
+    * подробно, радиус сглаживания - не задавать ммаленьким (~8-10 длин ячеек второго уровня).
+    * Не допускать слишком маленького радиуса сглаживания.
 */
 
 using namespace bielcc;
@@ -70,7 +75,7 @@ int main(int argc, char **argv)
                                {3., 2., 0.}};
 
 
-    //const double x[3] = {10., 10., 10.}; //+++++
+    // const double x[3] = {10., 10., 10.}; //+++++
     const double x[3] = {2., 1.5, 0.};
 
 
@@ -79,27 +84,37 @@ int main(int argc, char **argv)
     //==============================================
     //--------Global numerical parameters-----------
     //==============================================
-    const double IntegralAccuracy = 0.00001;
-    const double SmoothingR_r = 0.005;                // relative to cell diam h
-    const double SmoothingRSeg_r = 0.005;             // relative to cell diam h
-    const double AnalyticCalcR = 3.0;                  // relative to cell diam h
-    const int NCellStart = 8;                       
-    const int NSegStart = 10;
-    const int PMax = 10;                                // 2^{PMax} steps in surface integration
-    const int PMaxSeg = 10;                             // 2^{PMaxSeg} steps in segment integration
+    const double IntegralAccuracy = Calculation_Constants::INTEGRAL_ACCURACY;
+    const double SmoothingR_r = Calculation_Constants::SMOOTHING_DIST_SURF_INT;         // relative to small cell step h2
+    const double SmoothingRSeg_r = Calculation_Constants::SMOOTHING_DIST_SEG_INT;       // relative to small cell step h2
+    const double AnalyticCalcR = Calculation_Constants::ANALYTIC_CALC_DIST;             // relative to grid step h
+    const int NCellStart = Calculation_Constants::START_CELL_SPLIT;                       
+    const int NSegStart = Calculation_Constants::START_SEG_SPLIT;
+    const int PMaxCell = Calculation_Constants::PMAX_CELL_SPLIT;                        // 2^{PMax} steps in surface integration
+    const int PMaxSeg = Calculation_Constants::PMAX_SEG_SPLIT;                          // 2^{PMaxSeg} steps in segment integration
+    
+    std::cout << "Numerical values ​​of calculation parameters" << std::endl;
+    std::cout << "Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
+    std::cout << "Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
+    std::cout << "Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
+    std::cout << "Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
+    std::cout << "Starting cell split: " << NCellStart << std::endl;
+    std::cout << "Starting segment split: " << NSegStart << std::endl;
+    std::cout << "Limit cell split (2^{P}): " << PMaxCell << std::endl;
+    std::cout << "Limit segment split (2^{P}): " << PMaxSeg << std::endl;
+    std::cout << std::endl;
+ 
 
-
-
-    NumParam num_param_smooth(IntegralAccuracy, SmoothingR_r, SmoothingRSeg_r,
-                AnalyticCalcR, NCellStart, NSegStart, PMax, PMaxSeg); // параметры со сглаживанием
+    NumParam num_param_smooth(IntegralAccuracy, SmoothingR_r * 8, SmoothingRSeg_r,
+                AnalyticCalcR, NCellStart * 40, NSegStart, PMaxCell, PMaxSeg); // параметры со сглаживанием
 
     NumParam num_param(IntegralAccuracy, 10e-16, 10e-16,
-                AnalyticCalcR, NCellStart, NSegStart, PMax, PMaxSeg); // параметры без сглаживания
+                AnalyticCalcR, NCellStart, NSegStart, PMaxCell, PMaxSeg); // параметры без сглаживания
 
 
 
     const std::complex<double> j[3] = {1., 1., 1.,};
-    //const std::complex<double> j[3] = {1., 0., 0.};
+    // const std::complex<double> j[3] = {1., 2., 0.};
     const std::complex<double> k = std::complex<double>(1., 0.);
 
 
@@ -110,18 +125,19 @@ int main(int argc, char **argv)
     //-----------------(расчет поля)----------------
     //==============================================
     std::complex<double> res[3]{};
-    R_Rot_Smooth(j, x, rut1, num_param_smooth, k, res); // Сглаживание нужно, точка на ячейке
+    R_Rot_Smooth(j, x, rut1, num_param_smooth, k, res);   // Сглаживание нужно, точка на ячейке
     std::cout << "Test1. R в произвольной точке, сглаживание." << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
-
+    
     std::complex<double> res1[3]{}, res2[3]{};
-    R_Rot_Smooth(j, x, rut2, num_param, k, res1); // Сглаживание не нужно, точка вне ячейки
+    R_Rot_Smooth(j, x, rut2, num_param, k, res1);        // Сглаживание не нужно, точка вне ячейки
     R_Rot_Smooth(j, x, rut3, num_param_smooth, k, res2); // Сглаживание нужно, точка на ячейке
     std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
-
-
+    
+    R_Rot_Near(j, x, rut1, num_param_smooth, k, res);
+    std::cout << "      [4][4] (curl + surf): " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
     //==============================================
     //-------------------Test2---------------------+
@@ -140,7 +156,7 @@ int main(int argc, char **argv)
 
     R_Rot_Colloc(j, x2_colloc, rut3, num_param, k, res1);
     std::cout << "      [3][3] (not colloc pnt): " << res1[0] << " " << res1[1] << " " << res1[2] << std::endl;
-
+    
 
     return 0;
 }

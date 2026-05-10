@@ -35,7 +35,7 @@ namespace bielcc {
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        const KernelParam<KType>& ker_param, const IntegralParam& int_param, P* res)
+        KernelParam<KType>& ker_param, const IntegralParam& int_param, P* res)
 {
     double p, q, p1, q1, s, a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
     double delta = 0.;
@@ -98,10 +98,11 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
             break;
         }
 
-        n = n * 2; // the step is reduced by 2 times
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
     
@@ -129,7 +130,7 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        const KernelParam<KType>& ker_param, const IntegralParam& int_param, 
+        KernelParam<KType>& ker_param, const IntegralParam& int_param, 
         P* res)
 {
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
@@ -193,11 +194,12 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
         if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
             break;
         }
-        n = n * 2; // the step is reduced by 2 times
-        
+
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
 
@@ -241,8 +243,8 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[4][3],
             void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                                  const KernelParam<KType>& ker_param,
-                        const IntegralParam& int_param, P* res)
+                                        KernelParam<KType>& ker_param,
+                               const IntegralParam& int_param, P* res)
 {
     double p, q, p1, q1, s;
     double a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
@@ -304,10 +306,11 @@ void IntegralUniversal(const double (&cell)[4][3],
             break;
         }
 
-        n = n * 2; // the step is reduced by 2 times
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
 
@@ -332,8 +335,8 @@ void IntegralUniversal(const double (&cell)[4][3],
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[3][3],
             void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                                  const KernelParam<KType>& ker_param,
-                        const IntegralParam& int_param, P* res)
+                                        KernelParam<KType>& ker_param,
+                               const IntegralParam& int_param, P* res)
 {
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
     double p_vec[3], q_vec[3], r_vec[3];
@@ -396,11 +399,12 @@ void IntegralUniversal(const double (&cell)[3][3],
         if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
             break;
         }
-        n = n * 2; // the step is reduced by 2 times
-        
+
+        n = n * 2; // the step is reduced by 2 times -> smoothing radius divided by 2
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
+            ker_param.smoothR /= 2.;
         }
     }
 
