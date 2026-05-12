@@ -155,18 +155,18 @@ int main(int argc, char **argv)
                         SmoothingRSeg_r,
                         AnalyticCalcR,
                         NCellStart * 10,
-                        NSegStart * 20,
-                        PMaxCell * 8,
-                        PMaxSeg * 8);
+                        NSegStart * 10,
+                        PMaxCell * 6,
+                        PMaxSeg * 6);
 
     NumParam num_param_no_smooth(IntegralAccuracy,
                         Calculation_Constants::MACHINE_ZERO,
                         Calculation_Constants::MACHINE_ZERO,
                         AnalyticCalcR,
                         NCellStart * 10,
-                        NSegStart * 20,
-                        PMaxCell * 8,
-                        PMaxSeg * 8);
+                        NSegStart * 10,
+                        PMaxCell * 6,
+                        PMaxSeg * 6);
 
 
     const std::complex<double> k = std::complex<double>(1., 0.);
@@ -181,14 +181,14 @@ int main(int argc, char **argv)
     //---------------(расчет поля)------------------
     //==============================================
     std::complex<double> res[3];
-    K_RotRot_Near_Smooth(j, x, rut1, num_param, k, res);            // x on cell -> smooth (both terms)
+    K_RotRot_Near_Smooth(j, x, rut1, num_param, k, res);             // x on cell -> smooth (both terms)
     std::cout << "Test1. K[] со сглаживанием." << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
 
     std::complex<double> res1[3], res2[3];
-    K_RotRot_Near_Smooth(j, x, rut2, num_param_no_smooth, k, res1);           // x not on cell -> no smooth
-    K_RotRot_Near_Smooth(j, x, rut3, num_param, k, res2);           // x on cell -> smooth (both terms)
+    K_RotRot_Near_Smooth(j, x, rut2, num_param_no_smooth, k, res1);  // x not on cell -> no smooth
+    K_RotRot_Near_Smooth(j, x, rut3, num_param, k, res2);            // x on cell -> smooth (both terms)
     std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
 
@@ -242,14 +242,24 @@ int main(int argc, char **argv)
     //-------------специальным ядром----------------
     //-------(вычисление поля в дальней зоне)-------
     //==============================================
-    K_RotRot_Far(j, x, rut1, num_param, k, res);
-    std::cout << "Test4. K в дальней зоне (на ячейке не сработает!)" << std::endl;
-    std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
+    double rkt1[3]{}, rkt2[3]{}, rkt3[3]{};
+    double cell_diam1 = get_diam(rut1);
+    get_center_mass(rut1, rkt1);
+    get_center_mass(rut2, rkt2);
+    get_center_mass(rut3, rkt3);
+    if (dist(x, rkt1) > 3. * cell_diam1 &&
+        dist(x, rkt2) > 3. * cell_diam1 &&
+        dist(x, rkt3) > 3. * cell_diam1)
+    {
+        K_RotRot_Far(j, x, rut1, num_param, k, res);
+        std::cout << "Test4. K в дальней зоне (на ячейке не сработает!)" << std::endl;
+        std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
-    K_RotRot_Far(j, x, rut2, num_param, k, res1);
-    K_RotRot_Far(j, x, rut3, num_param, k, res2);
-    std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
+        K_RotRot_Far(j, x, rut2, num_param, k, res1);
+        K_RotRot_Far(j, x, rut3, num_param, k, res2);
+        std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
 
+    }
     return 0;
 }

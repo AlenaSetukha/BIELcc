@@ -93,25 +93,36 @@ int main(int argc, char **argv)
     const int PMaxCell = Calculation_Constants::PMAX_CELL_SPLIT;                        // 2^{PMax} steps in surface integration
     const int PMaxSeg = Calculation_Constants::PMAX_SEG_SPLIT;                          // 2^{PMaxSeg} steps in segment integration
     
-    std::cout << "Numerical values ​​of calculation parameters" << std::endl;
-    std::cout << "Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
-    std::cout << "Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
-    std::cout << "Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
-    std::cout << "Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
-    std::cout << "Starting cell split: " << NCellStart << std::endl;
-    std::cout << "Starting segment split: " << NSegStart << std::endl;
-    std::cout << "Limit cell split (2^{P}): " << PMaxCell << std::endl;
-    std::cout << "Limit segment split (2^{P}): " << PMaxSeg << std::endl;
+    std::cout << "Numerical values ​​of calculation parameters BY DEFAULT" << std::endl;
+    std::cout << "      Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
+    std::cout << "      Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
+    std::cout << "      Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
+    std::cout << "      Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
+    std::cout << "      Starting cell split: " << NCellStart << std::endl;
+    std::cout << "      Starting segment split: " << NSegStart << std::endl;
+    std::cout << "      Limit cell split (2^{P}): " << PMaxCell << std::endl;
+    std::cout << "      Limit segment split (2^{P}): " << PMaxSeg << std::endl;
     std::cout << std::endl;
  
 
-    NumParam num_param_smooth(IntegralAccuracy, SmoothingR_r * 8, SmoothingRSeg_r,
-                AnalyticCalcR, NCellStart * 40, NSegStart, PMaxCell, PMaxSeg); // параметры со сглаживанием
 
-    NumParam num_param(IntegralAccuracy, 10e-16, 10e-16,
-                AnalyticCalcR, NCellStart, NSegStart, PMaxCell, PMaxSeg); // параметры без сглаживания
+    NumParam num_param_smooth(IntegralAccuracy,
+                        SmoothingR_r * 1.5,
+                        SmoothingRSeg_r * 1.5,
+                        AnalyticCalcR,
+                        NCellStart * 20,
+                        NSegStart * 40,
+                        PMaxCell * 4,
+                        PMaxSeg * 4);
 
-
+    NumParam num_param_no_smooth(IntegralAccuracy,
+                        Calculation_Constants::MACHINE_ZERO,
+                        Calculation_Constants::MACHINE_ZERO,
+                        AnalyticCalcR,
+                        NCellStart * 10,
+                        NSegStart * 10,
+                        PMaxCell * 4,
+                        PMaxSeg * 4);
 
     const std::complex<double> j[3] = {1., 1., 1.,};
     // const std::complex<double> j[3] = {1., 2., 0.};
@@ -125,38 +136,52 @@ int main(int argc, char **argv)
     //-----------------(расчет поля)----------------
     //==============================================
     std::complex<double> res[3]{};
-    R_Rot_Smooth(j, x, rut1, num_param_smooth, k, res);   // Сглаживание нужно, точка на ячейке
+    R_Rot_Smooth(j, x, rut1, num_param_smooth, k, res);           // Сглаживание нужно, точка на ячейке
     std::cout << "Test1. R в произвольной точке, сглаживание." << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
     
     std::complex<double> res1[3]{}, res2[3]{};
-    R_Rot_Smooth(j, x, rut2, num_param, k, res1);        // Сглаживание не нужно, точка вне ячейки
-    R_Rot_Smooth(j, x, rut3, num_param_smooth, k, res2); // Сглаживание нужно, точка на ячейке
+    R_Rot_Smooth(j, x, rut2, num_param_no_smooth, k, res1);        // Сглаживание не нужно, точка вне ячейки
+    R_Rot_Smooth(j, x, rut3, num_param_smooth, k, res2);           // Сглаживание нужно, точка на ячейке
     std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
     
     R_Rot_Near(j, x, rut1, num_param_smooth, k, res);
     std::cout << "      [4][4] (curl + surf): " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
+
+
+
     //==============================================
     //-------------------Test2---------------------+
     //-----------R[] в точках коллокации------------
-    //------------внутри сглаживания нет------------
+    //------------(внутри сглаживания нет)------------
     //==============================================
     const double x1_colloc[3] = {1.25, 1., 0.};
-    R_Rot_Colloc(j, x1_colloc, rut1, num_param, k, res);
+    R_Rot_Colloc(j, x1_colloc, rut1, num_param_no_smooth, k, res);
     std::cout << "Test2. R в точке коллокации" << std::endl;
     std::cout << "      [4][4]: " << res[0] << " " << res[1] << " " << res[2] << std::endl;
 
 
     const double x2_colloc[3] = {2. / 3., 2. / 3., 0.};
-    R_Rot_Colloc(j, x2_colloc, rut2, num_param, k, res1);
+    R_Rot_Colloc(j, x2_colloc, rut2, num_param_no_smooth, k, res1);
     std::cout << "      [3][3]: " << res1[0] << " " << res1[1] << " " << res1[2] << std::endl;
 
-    R_Rot_Colloc(j, x2_colloc, rut3, num_param, k, res1);
+
+
+
+    //==============================================
+    //-------------------Test3---------------------+
+    //-----------R[] в точках коллокации------------
+    //-----------(внутри сглаживания нет)-----------
+    //==============================================
+    std::cout << std::endl;
+    std::cout << "Test3. R_Rot_Colloc не в точке коллокации" << std::endl;
+    R_Rot_Colloc(j, x2_colloc, rut3, num_param_no_smooth, k, res1); // not colloc point for rut3 -> calculation with no smoothing
     std::cout << "      [3][3] (not colloc pnt): " << res1[0] << " " << res1[1] << " " << res1[2] << std::endl;
-    
+    R_Rot_Smooth(j, x2_colloc, rut3, num_param_no_smooth, k, res1);
+    std::cout << "      [3][3] (numerically): " << res1[0] << " " << res1[1] << " " << res1[2] << std::endl;
 
     return 0;
 }

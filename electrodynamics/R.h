@@ -51,6 +51,7 @@ void R_Rot_Smooth(const JType* j, const double* x, const double (&cell)[CellPoin
 
     KernelParam<KType> param;
     param.smoothR = num_param.rs * get_diam(cell) / num_param.n_start;
+    param.smoothRMin = get_diam(cell) / 100.;
     param.k = k;
     IntegralParam int_parGradF(3, num_param.n_start, num_param.p_max, num_param.eps);
 
@@ -97,7 +98,8 @@ void R_Rot_Colloc(const JType* j, const double* x, const double (&cell)[CellPoin
     } else {
         std::complex<double> cur_res3[3]{};
         KernelParam<KType> param;
-        param.smoothR = Tolerance_Constants::MACHINE_ZERO;
+        param.smoothR = Calculation_Constants::MACHINE_ZERO;
+        param.smoothRMin = Calculation_Constants::MACHINE_ZERO;
         param.k = k;
         
         IntegralParam int_parGradF(3, num_param.n_start, num_param.p_max, num_param.eps);
@@ -145,6 +147,7 @@ void R_Rot_Near(const JType* j, const double* x, const double (&cell)[CellPoints
     std::complex<double> surf_int[3]{}, res_surf[3]{};
     KernelParam<KType> param;
     param.smoothR = num_param.rs * get_diam(cell) / num_param.n_start;
+    param.smoothRMin = get_diam(cell) / 100.;
     param.k = k;
     param.n[0] = norm[0], param.n[1] = norm[1], param.n[2] = norm[2];
     IntegralParam int_parFDpot(3, num_param.n_start, num_param.p_max, num_param.eps);
@@ -154,7 +157,8 @@ void R_Rot_Near(const JType* j, const double* x, const double (&cell)[CellPoints
     // -curl_int (nu * F_DoublePot_H)
     std::complex<double> res_curl[3]{};
     KernelParam<KType> param_seg;
-    param_seg.smoothR = 10e-16;
+    param_seg.smoothR = Calculation_Constants::MACHINE_ZERO;
+    param_seg.smoothRMin = Calculation_Constants::MACHINE_ZERO;
     param_seg.k = k;
     
     IntegralParam int_parnuF(3, num_param.n_start_seg, num_param.p_max_seg, num_param.eps);
