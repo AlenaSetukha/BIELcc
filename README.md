@@ -41,7 +41,8 @@ The library allows solving problems of electromagnetic wave scattering on perfec
 ## How to install library
 ``` bash
 git clone https://github.com/AlenaSetukha/BIELcc.git
-cd bielcc
-mkdir build &amp;&amp; cd build
+cd BIELcc
+mkdir build 
+cd build
 cmake ..
-make
+cmake --build .

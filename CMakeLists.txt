@@ -38,21 +38,21 @@ set(BIELCCSOURCE
     mesh/point.cpp
     mesh/segment.cpp
     mesh/surf_mesh.cpp)
-add_library(bielcc STATIC ${BIELCCSOURCE})
+add_library(BIELcc STATIC ${BIELCCSOURCE})
 
 
 
 # Указываем, где лежат хедеры, чтобы другие проекты их видели
-target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/electrodynamics)
-target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geometry)
-target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/integrators)
-target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io)
-target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
+target_include_directories(BIELcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/electrodynamics)
+target_include_directories(BIELcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geometry)
+target_include_directories(BIELcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/integrators)
+target_include_directories(BIELcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io)
+target_include_directories(BIELcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
 
 
 
-target_link_libraries(bielcc PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
+target_link_libraries(BIELcc PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
 if(OPENMP_FOUND)
-    target_link_libraries(bielcc PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(BIELcc PUBLIC OpenMP::OpenMP_CXX)
 endif()
-target_link_libraries(bielcc PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
+target_link_libraries(BIELcc PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
