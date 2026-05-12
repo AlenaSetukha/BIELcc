@@ -14,6 +14,7 @@
 #include "kernel_lib.h"
 #include "K0.h"
 #include "integrals_analytic.h"
+#include "constants.h"
 
 
 
@@ -49,10 +50,12 @@ void K_RotRot_Near_Smooth(const JType* j, const double* x, const double (&cell)[
 {
     KernelParam<KType> param_F;
     param_F.smoothR = num_param.rs * get_diam(cell) / num_param.n_start;
+    param_F.smoothRMin = num_param.eps;
     param_F.k = k;
 
     KernelParam<KType> param_GradF;
     param_GradF.smoothR = num_param.rs_seg * get_diam(cell) / num_param.n_start_seg;
+    param_GradF.smoothRMin = num_param.eps;
     param_GradF.k = k;
 
     IntegralParam int_parF(1, num_param.n_start, num_param.p_max, num_param.eps);
@@ -131,6 +134,7 @@ void K_RotRot_HS(const JType* j, const double* x, const double (&cell)[CellPoint
     std::complex<double> res3[3];
     KernelParam<KType> param_seg;
     param_seg.smoothR = num_param.rs_seg * get_diam(cell) / num_param.n_start_seg;
+    param_seg.smoothRMin = num_param.eps;
     param_seg.k = k;
     
     IntegralParam  int_parGradF(3, num_param.n_start_seg, num_param.p_max_seg, num_param.eps);
@@ -188,7 +192,8 @@ void K_RotRot_HS_Colloc(const JType* j, const double* x, const double (&cell)[Ce
     // -curv
     std::complex<double> res3[3]{};
     KernelParam<KType> param_seg;
-    param_seg.smoothR = 10e-16;
+    param_seg.smoothR = Calculation_Constants::MACHINE_ZERO;
+    param_seg.smoothRMin = Calculation_Constants::MACHINE_ZERO;
     param_seg.k = k;
     
     IntegralParam int_parGradF(3, num_param.n_start_seg, num_param.p_max_seg, num_param.eps);
@@ -285,7 +290,8 @@ void K_RotRot_Far(const JType* j, const double* x, const double (&cell)[CellPoin
                    const NumParam& num_param, const KType k, std::complex<double>* res)
 {
     KernelParam<KType> param_KFar;
-    param_KFar.smoothR = 10e-16;
+    param_KFar.smoothR = Calculation_Constants::MACHINE_ZERO;
+    param_KFar.smoothRMin = Calculation_Constants::MACHINE_ZERO;
     param_KFar.k = k;
     param_KFar.current[0] = j[0], param_KFar.current[1] = j[1], param_KFar.current[2] = j[2];
     IntegralParam int_parF(3, num_param.n_start, num_param.p_max, num_param.eps);

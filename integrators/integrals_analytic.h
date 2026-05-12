@@ -146,6 +146,7 @@ std::complex<double> IntegralSurf_SimplePot_H_HS(const double (&cell)[CellPoints
     KernelParam<KType> param;
     param.k = k_wave;
     param.smoothR = Tolerance_Constants::MACHINE_ZERO;
+    param.smoothRMin = Tolerance_Constants::MACHINE_ZERO;
 
     double calc_dist = analyticR_r * get_diam(cell);
     double r = dist(x, y);

@@ -17,10 +17,13 @@
     * Rectangle formula, integration over dy.
  */
 
-constexpr static const int _DIM_MAX = 3;
 
 
 namespace bielcc {
+
+constexpr static const int _DIM_MAX_SEG = 3;
+constexpr static const int _PMAX_SMOOTH_SEG = 8;
+
 /**
     * @brief Integral over a segment [a, b] from the function F(xk, y)
     * @param a Point1 [3]
@@ -42,9 +45,10 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
     int n = int_param.GetNStart();
     double d[3], y[3], dl, delta = 0.;
     int idim = int_param.GetIDim();
+    double eps_acc = int_param.GetEpsAccur();
 
 
-    P ff[_DIM_MAX]{}, res_prev[_DIM_MAX]{}; 
+    P ff[_DIM_MAX_SEG]{}, res_prev[_DIM_MAX_SEG]{}; 
     for (int g = 0; g < idim; g++) {
         res[g] = static_cast<P>(0);
     }
@@ -72,7 +76,7 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -80,7 +84,9 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH_SEG && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
 
@@ -121,8 +127,9 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
     int n = int_param.GetNStart();
     double d[3], y[3], dl, delta = 0.;
     int idim = int_param.GetIDim();
+    double eps_acc = int_param.GetEpsAccur();
 
-    P ff[_DIM_MAX]{}, res_prev[_DIM_MAX]{};
+    P ff[_DIM_MAX_SEG]{}, res_prev[_DIM_MAX_SEG]{};
     for (int g = 0; g < idim; g++) {
         res[g] = static_cast<P>(0);
     }
@@ -150,7 +157,7 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -158,7 +165,9 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH_SEG && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
 

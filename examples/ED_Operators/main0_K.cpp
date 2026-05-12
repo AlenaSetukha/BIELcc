@@ -129,23 +129,23 @@ int main(int argc, char **argv)
     //-------Global numerical parameters------------
     //==============================================
     const double IntegralAccuracy = Calculation_Constants::INTEGRAL_ACCURACY;
-    const double SmoothingR_r = Calculation_Constants::SMOOTHING_DIST_SURF_INT * 0.5;         // relative to small cell step h2
-    const double SmoothingRSeg_r = Calculation_Constants::SMOOTHING_DIST_SEG_INT * 0.5;       // relative to small cell step h2
+    const double SmoothingR_r = Calculation_Constants::SMOOTHING_DIST_SURF_INT;         // relative to small cell step h2
+    const double SmoothingRSeg_r = Calculation_Constants::SMOOTHING_DIST_SEG_INT;       // relative to small cell step h2
     const double AnalyticCalcR = Calculation_Constants::ANALYTIC_CALC_DIST;             // relative to grid step h
-    const int NCellStart = Calculation_Constants::START_CELL_SPLIT * 50;                       
-    const int NSegStart = Calculation_Constants::START_SEG_SPLIT * 50;
+    const int NCellStart = Calculation_Constants::START_CELL_SPLIT;                       
+    const int NSegStart = Calculation_Constants::START_SEG_SPLIT;
     const int PMaxCell = Calculation_Constants::PMAX_CELL_SPLIT;                        // 2^{PMax} steps in surface integration
     const int PMaxSeg = Calculation_Constants::PMAX_SEG_SPLIT;                          // 2^{PMaxSeg} steps in segment integration
     
-    std::cout << "Numerical values ​​of calculation parameters" << std::endl;
-    std::cout << "Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
-    std::cout << "Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
-    std::cout << "Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
-    std::cout << "Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
-    std::cout << "Starting cell split: " << NCellStart << std::endl;
-    std::cout << "Starting segment split: " << NSegStart << std::endl;
-    std::cout << "Limit cell split (2^{P}): " << PMaxCell << std::endl;
-    std::cout << "Limit segment split (2^{P}): " << PMaxSeg << std::endl;
+    std::cout << "Numerical values ​​of calculation parameters BY DEFAULT" << std::endl;
+    std::cout << "      Integrals calculation accuracy: " << IntegralAccuracy << std::endl;
+    std::cout << "      Relative smoothing radius (surface, rel. to h2): " << SmoothingR_r << std::endl;
+    std::cout << "      Relative smoothing radius (segment, rel. to h2): " << SmoothingRSeg_r << std::endl;
+    std::cout << "      Radius of analytical calculation (rel. to h): " << AnalyticCalcR << std::endl;
+    std::cout << "      Starting cell split: " << NCellStart << std::endl;
+    std::cout << "      Starting segment split: " << NSegStart << std::endl;
+    std::cout << "      Limit cell split (2^{P}): " << PMaxCell << std::endl;
+    std::cout << "      Limit segment split (2^{P}): " << PMaxSeg << std::endl;
     std::cout << std::endl;
  
 
@@ -154,10 +154,19 @@ int main(int argc, char **argv)
                         SmoothingR_r,
                         SmoothingRSeg_r,
                         AnalyticCalcR,
-                        NCellStart,
-                        NSegStart,
-                        PMaxCell,
-                        PMaxSeg);
+                        NCellStart * 10,
+                        NSegStart * 20,
+                        PMaxCell * 8,
+                        PMaxSeg * 8);
+
+    NumParam num_param_no_smooth(IntegralAccuracy,
+                        Calculation_Constants::MACHINE_ZERO,
+                        Calculation_Constants::MACHINE_ZERO,
+                        AnalyticCalcR,
+                        NCellStart * 10,
+                        NSegStart * 20,
+                        PMaxCell * 8,
+                        PMaxSeg * 8);
 
 
     const std::complex<double> k = std::complex<double>(1., 0.);
@@ -178,7 +187,7 @@ int main(int argc, char **argv)
 
 
     std::complex<double> res1[3], res2[3];
-    K_RotRot_Near_Smooth(j, x, rut2, num_param, k, res1);           // x not on cell -> no smooth
+    K_RotRot_Near_Smooth(j, x, rut2, num_param_no_smooth, k, res1);           // x not on cell -> no smooth
     K_RotRot_Near_Smooth(j, x, rut3, num_param, k, res2);           // x on cell -> smooth (both terms)
     std::cout << "      [3][3] + [3][3]: " << res1[0] + res2[0] << " " << res1[1] + res2[1] << " " << res1[2] + res2[2] << std::endl;
 
@@ -200,7 +209,7 @@ int main(int argc, char **argv)
 
 
     std::complex<double> res13[3], res23[3];
-    K_RotRot_HS(j, x, rut2, num_param, k, res13);
+    K_RotRot_HS(j, x, rut2, num_param_no_smooth, k, res13);
     K_RotRot_HS(j, x, rut3, num_param, k, res23); 
     std::cout << "      [3][3] + [3][3]: " << res13[0] + res23[0] << " " << res13[1] + res23[1] << " " << res13[2] + res23[2] << std::endl;
     

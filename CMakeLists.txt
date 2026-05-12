@@ -64,7 +64,7 @@ add_library(pcac_lib STATIC ${SOURCE})
 
 
 
-add_executable(main0 ../examples/PEC/main0_field_test.cpp)
+add_executable(main0 ../examples/ED_Operators/main0_R.cpp)
 
 
 target_link_libraries(main0 PUBLIC pcac_lib)

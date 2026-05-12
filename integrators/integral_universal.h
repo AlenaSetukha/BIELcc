@@ -8,10 +8,11 @@
 #include "element_geom.h"
 
 
+namespace bielcc {
 
 constexpr static const int _DIM_MAX_CELL = 3;
+constexpr static const int _PMAX_SMOOTH = 8;
 
-namespace bielcc {
 //===========================================================
 //-------Integral in point over a cell by F(xk, y)-----------
 //===========================================================
@@ -19,6 +20,8 @@ namespace bielcc {
     * Calculates the surface integral over a quadrangular
     * (triangular) cell of a function  F(xk, y) at fixed
     * point xk. Rectangle formula, integration over dy.
+    * 
+    * If KernelParam use smoothing radius, it is adaptively reduced to min smooth radius.
 */
 
 
@@ -30,7 +33,7 @@ namespace bielcc {
     * @param ker_param Integrand parameters
     * @param int_param Integration parameters
     * @param res Result
-    * @note Rectangle formula, integration by dy
+    * @note Rectangle formula, integration by dy.
 */
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
@@ -42,6 +45,7 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     int p_n = 0;
+    double eps_acc = int_param.GetEpsAccur();
 
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
@@ -94,7 +98,7 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -102,7 +106,9 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
     
@@ -138,6 +144,7 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
     double delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
+    double eps_acc = int_param.GetEpsAccur();
     int p_n = 0;
 
 
@@ -191,7 +198,7 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -199,7 +206,9 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
 
@@ -251,6 +260,7 @@ void IntegralUniversal(const double (&cell)[4][3],
     double delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
+    double eps_acc = int_param.GetEpsAccur();
     int p_n = 0;
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
@@ -302,7 +312,7 @@ void IntegralUniversal(const double (&cell)[4][3],
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -310,7 +320,9 @@ void IntegralUniversal(const double (&cell)[4][3],
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
 
@@ -343,6 +355,7 @@ void IntegralUniversal(const double (&cell)[3][3],
     double delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
+    double eps_acc = int_param.GetEpsAccur();
     int p_n = 0;
 
 
@@ -396,7 +409,7 @@ void IntegralUniversal(const double (&cell)[3][3],
             delta += std::abs(res[g] - res_prev[g]) * std::abs(res[g] - res_prev[g]);
         }
 
-        if (delta <  int_param.GetEpsAccur() * int_param.GetEpsAccur() && p_n != 0) {
+        if (delta <  eps_acc * eps_acc && p_n != 0) {
             break;
         }
 
@@ -404,7 +417,9 @@ void IntegralUniversal(const double (&cell)[3][3],
         for (int g = 0; g < idim; g++) {
             res_prev[g] = res[g];
             res[g] = static_cast<P>(0);
-            ker_param.smoothR /= 2.;
+            if (p_n < _PMAX_SMOOTH && ker_param.smoothR > ker_param.smoothRMin) {
+                ker_param.smoothR /= 2.;
+            }
         }
     }
 
