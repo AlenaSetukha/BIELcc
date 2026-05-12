@@ -1,11 +1,11 @@
-# BIELCC
+# BIELcc
 
 Library for E/D field calculation by boundary integral equetion method. 
 
 ## Description
 The library implements functionality for calculating electric and magnetic fields using the boundary integral equation method.
 
-The library allows solving problems of electromagnetic wave scattering on perfectly conducting surfaces, homogeneous dielectrics, and plasmonic particles using this method.
+BIELcc allows solving problems of electromagnetic wave scattering on perfectly conducting surfaces, homogeneous dielectrics, and plasmonic particles using this method.
 
 
 ## Library structure
@@ -46,3 +46,31 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
+```
+
+## How to link BIELcc
+How to link the BIELcc library to your executable file using cmake:
+``` bash
+CMakeLists.txt
+
+...
+# Добавление библиотеки BIELcc
+add_subdirectory(BIELcc)
+
+... 
+
+# Видимость BIELcc для ваших расширений / библиотек
+target_link_libraries(extentions_lib PRIVATE BIELcc)
+
+...
+
+# Ваш основной исполняемый файл
+add_executable(main0 ../main0.cpp)
+
+
+# Привязка к исполняемому файлу всех библиотек
+target_link_libraries(main0 PRIVATE BIELcc)
+target_link_libraries(main0 PRIVATE extentions_lib)
+
+...
+```
