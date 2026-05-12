@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(PCAC_LIB CXX)
+project(BIELCC_LIB CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -13,10 +13,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "-Og -g -Wall -Wextra -pedantic -fsanitize=leak, -fsan
 set(CMAKE_CXX_FLAGS_RELEASE "-flto -march=native")
 
 
-### Компиляция с флагами: $ cmake -DCMAKE_BUILD_TYPE=Debug ..
-### set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -march=native")
-
-
 
 # Найдите LAPACK и BLAS библиотеки
 find_package(LAPACK REQUIRED)
@@ -26,25 +22,9 @@ find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-include_directories(${LAPACK_INCLUDE_DIRS} ${BLAS_INCLUDE_DIRS})
 
 
-
-
-
-
-include_directories(electrodynamics) 
-include_directories(geometry)
-include_directories(integrators)
-include_directories(io)
-include_directories(mesh)
-
-
-
-
-
-
-set(SOURCE
+set(BIELCCSOURCE
     electrodynamics/currents.cpp
     electrodynamics/material.cpp
     electrodynamics/num_param.cpp
@@ -52,23 +32,27 @@ set(SOURCE
     geometry/element_geom.cpp
     integrators/integral_param.cpp
     integrators/integrals_analytic.cpp
-    io/io_vtk.cpp
     io/io_aereco.cpp
+    io/io_vtk.cpp
     mesh/cell.cpp
     mesh/point.cpp
     mesh/segment.cpp
     mesh/surf_mesh.cpp)
-add_library(pcac_lib STATIC ${SOURCE})
+add_library(bielcc STATIC ${BIELCCSOURCE})
 
 
 
+# Указываем, где лежат хедеры, чтобы другие проекты их видели
+target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/electrodynamics)
+target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/geometry)
+target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/integrators)
+target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/io)
+target_include_directories(bielcc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
 
 
-add_executable(main0 ../examples/ED_Operators/main0_R.cpp)
 
-
-target_link_libraries(main0 PUBLIC pcac_lib)
-target_link_libraries(main0 PRIVATE lapacke lapack blas)
-target_link_libraries(main0 PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
-target_link_libraries(main0 PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
-
+target_link_libraries(bielcc PUBLIC ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}) # Линкуем LAPACK и BLAS библиотеки
+if(OPENMP_FOUND)
+    target_link_libraries(bielcc PUBLIC OpenMP::OpenMP_CXX)
+endif()
+target_link_libraries(bielcc PUBLIC MPI::MPI_CXX) # Связывание MPI с вашим исполняемым файлом
