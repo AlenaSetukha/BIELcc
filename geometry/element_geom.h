@@ -107,5 +107,24 @@ double vec_length(const T* vec_1)
                 std::abs(vec_1[2]) * std::abs(vec_1[2]));
 }
 
+
+
+
+
+
+
+//===========================================================
+//-------------Orthogonalization of two vectors--------------
+//===========================================================
+/**
+    * @brief Orthogonalization of two vectors (norm + orth)
+    * @param vec1 first initial vector
+    * @param vec2 second initial vector
+    * @param vec1_orth first orthgnlzd vector (res)
+    * @param vec2_orth second orthgnlzd vector (res)
+*/
+void vecs_orthoganalization(const double* vec1, const double* vec2,
+                             double* vec1_orth, double* vec2_orth);
+
 }       // namespace bielcc
 #endif  // _ELEMENT_GEOM_H_

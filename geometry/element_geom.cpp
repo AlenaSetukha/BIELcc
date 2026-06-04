@@ -353,4 +353,38 @@ int check_points_match(const double* a, const double* b) {
     }
     return res;
 }
+
+
+
+void vecs_orthoganalization(const double* vec1, const double* vec2,
+                             double* vec1_orth, double* vec2_orth)
+{
+    // Normalization + ortogonalization
+    for (int i = 0; i < 3; i++) {
+        vec1_orth[i] = vec1[i];
+        vec2_orth[i] = vec2[i];
+    }
+
+    double len1 = vec_length(vec1_orth);
+    if (len1 > std::numeric_limits<float>::epsilon()) {
+        vec1_orth[0] /= len1;
+        vec1_orth[1] /= len1;
+        vec1_orth[2] /= len1;
+    }
+
+
+    double sp = scal_prod(vec1_orth, vec2_orth);
+    vec2_orth[0] -= sp * vec1_orth[0];
+    vec2_orth[1] -= sp * vec1_orth[1];
+    vec2_orth[2] -= sp * vec1_orth[2];
+
+    double len2 = vec_length(vec2_orth);
+    if (len2 > std::numeric_limits<float>::epsilon()) {
+        vec2_orth[0] /= len2;
+        vec2_orth[1] /= len2;
+        vec2_orth[2] /= len2;
+    }
+}
+
+
 } // namespace bielcc

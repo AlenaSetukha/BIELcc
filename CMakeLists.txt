@@ -37,7 +37,9 @@ set(BIELCCSOURCE
     mesh/cell.cpp
     mesh/point.cpp
     mesh/segment.cpp
-    mesh/surf_mesh.cpp)
+    mesh/surf_mesh.cpp
+    mesh/edges_surf_mesh.cpp 
+    mesh/nodes_surf_mesh.cpp )
 add_library(BIELcc STATIC ${BIELCCSOURCE})
 
 
