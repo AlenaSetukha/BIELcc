@@ -13,17 +13,6 @@ namespace bielcc {
 constexpr static const int _DIM_MAX_CELL = 3;
 constexpr static const int _PMAX_SMOOTH = 8;
 
-//===========================================================
-//-------Integral in point over a cell by F(xk, y)-----------
-//===========================================================
-/**
-    * Calculates the surface integral over a quadrangular
-    * (triangular) cell of a function  F(xk, y) at fixed
-    * point xk. Rectangle formula, integration over dy.
-    * 
-    * If KernelParam use smoothing radius, it is adaptively reduced to min smooth radius.
-*/
-
 
 /**
     * @brief Surface integral over a quadrangular cell from the F(xk, y)
@@ -33,7 +22,8 @@ constexpr static const int _PMAX_SMOOTH = 8;
     * @param ker_param Integrand parameters
     * @param int_param Integration parameters
     * @param res Result
-    * @note Rectangle formula, integration by dy.
+    * @note Rectangle formula, integration by dy. If KernelParam use smoothing radius,
+    * it is adaptively reduced to min smooth radius.
 */
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
@@ -44,9 +34,10 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
     double delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
-    int p_n = 0;
+    const int PMax = int_param.GetPMax();
     double eps_acc = int_param.GetEpsAccur();
 
+    double start_rs = ker_param.smoothR;
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
 
@@ -54,8 +45,8 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
         res[g] = static_cast<P>(0);
     }
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 p = (double)i / (double)n;
@@ -112,11 +103,13 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
         }
     }
     
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+
+    ker_param.smoothR = start_rs;
 }
 
 
@@ -131,7 +124,8 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
     * @param ker_param Integrand parameters
     * @param int_param Integration parameters
     * @param res Result
-    * @note Rectangle formula, integration by dy.
+    * @note Rectangle formula, integration by dy. If KernelParam use smoothing radius,
+    * it is adaptively reduced to min smooth radius.
 */
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
@@ -145,8 +139,9 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     double eps_acc = int_param.GetEpsAccur();
-    int p_n = 0;
+    const int PMax = int_param.GetPMax();
 
+    int start_rs = ker_param.smoothR;
 
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
@@ -156,8 +151,8 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
 
     s = tr_square(cell[0], cell[1], cell[2]);
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int k = 0; k < 3; k++) {
             p_vec[k] = (cell[1][k] - cell[0][k]) / n;
             q_vec[k] = (cell[2][k] - cell[0][k]) / n;
@@ -212,11 +207,12 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
         }
     }
 
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+    ker_param.smoothR = start_rs;
 }
 
 
@@ -230,16 +226,6 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
 
 
 
-//===========================================================
-//-------------Integral over a cell by F(x)------------------
-//===========================================================
-/**
-    * Calculates the surface integral over a quadrangular
-    * (triangular) cell of a function  F(x). Rectangle formula,
-    * integration over dx.
-*/
-
-
 /**
     * @brief Surface integral over a quadrangular cell from the F(x)
     * @param cell Integration cell [4][3]
@@ -247,7 +233,8 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
     * @param ker_param Integrand parameters
     * @param int_param Integration parameters
     * @param res Result
-    * @note Rectangle formula, integration by dx
+    * @note Rectangle formula, integration by dx. If KernelParam use smoothing radius,
+    * it is adaptively reduced to min smooth radius.
 */
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[4][3],
@@ -261,15 +248,18 @@ void IntegralUniversal(const double (&cell)[4][3],
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     double eps_acc = int_param.GetEpsAccur();
-    int p_n = 0;
+    const int PMax = int_param.GetPMax();
+
+    double start_rs = ker_param.smoothR;
+
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
     for (int g = 0; g < idim; g++) {
         res[g] = static_cast<P>(0);
     }
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 p = (double)i / (double)n;
@@ -326,11 +316,13 @@ void IntegralUniversal(const double (&cell)[4][3],
         }
     }
 
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+    
+    ker_param.smoothR = start_rs;
 }
 
 
@@ -342,7 +334,8 @@ void IntegralUniversal(const double (&cell)[4][3],
     * @param ker_param Integrand parameters
     * @param int_param Integration parameters
     * @param res Result
-    * @note Rectangle formula, integration by dx
+    * @note Rectangle formula, integration by dx. If KernelParam use smoothing radius,
+    * it is adaptively reduced to min smooth radius.
 */
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[3][3],
@@ -356,8 +349,9 @@ void IntegralUniversal(const double (&cell)[3][3],
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     double eps_acc = int_param.GetEpsAccur();
-    int p_n = 0;
+    const int PMax = int_param.GetPMax();
 
+    double start_rs = ker_param.smoothR;
 
 
     P ff[_DIM_MAX_CELL]{}, res_prev[_DIM_MAX_CELL]{};
@@ -367,8 +361,8 @@ void IntegralUniversal(const double (&cell)[3][3],
 
     s = tr_square(cell[0], cell[1], cell[2]);
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int k = 0; k < 3; k++) {
             p_vec[k] = (cell[1][k] - cell[0][k]) / n;
             q_vec[k] = (cell[2][k] - cell[0][k]) / n;
@@ -423,11 +417,13 @@ void IntegralUniversal(const double (&cell)[3][3],
         }
     }
 
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+
+    ker_param.smoothR = start_rs;
 }
 
 

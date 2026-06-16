@@ -8,17 +8,6 @@
 #include "element_geom.h"
 
 
-//===========================================================
-//------Integral in point over a segment by F(xk, y)---------
-//===========================================================
-/**
-    * Calculates the curvilinear integral over a segment of
-    * the function F(xk,y) at the fixed point xk.
-    * Rectangle formula, integration over dy.
- */
-
-
-
 namespace bielcc {
 
 constexpr static const int _DIM_MAX_SEG = 3;
@@ -41,20 +30,21 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
         KernelParam<KType>& ker_param, const IntegralParam& int_param,
         P* res)
 {
-    int p_n;
-    int n = int_param.GetNStart();
     double d[3], y[3], dl, delta = 0.;
+    int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     double eps_acc = int_param.GetEpsAccur();
+    const int PMax = int_param.GetPMax();
 
+    double start_rs = ker_param.smoothR;
 
     P ff[_DIM_MAX_SEG]{}, res_prev[_DIM_MAX_SEG]{}; 
     for (int g = 0; g < idim; g++) {
         res[g] = static_cast<P>(0);
     }
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int j = 0; j < 3; j++) {
             d[j] = (b[j] - a[j]) / n;
         }
@@ -90,22 +80,15 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
         }
     }
 
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+
+    ker_param.smoothR = start_rs;
 }
 
-
-
-//===========================================================
-//------------Integral over a segment by F(x)------------
-//===========================================================
-/**
-    * Calculates the curvilinear integral over a segment of
-    * the function F(x). Rectangle formula, integration over dx.
-*/
 
 /**
     * @brief Integral over a segment [a, b] from the function F(x)
@@ -123,19 +106,21 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
                                     KernelParam<KType>& ker_param,
                            const IntegralParam& int_param, P* res)
 {
-    int p_n;
-    int n = int_param.GetNStart();
     double d[3], y[3], dl, delta = 0.;
+    int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
     double eps_acc = int_param.GetEpsAccur();
+    const int PMax = int_param.GetPMax();
+
+    double start_rs = ker_param.smoothR;
 
     P ff[_DIM_MAX_SEG]{}, res_prev[_DIM_MAX_SEG]{};
     for (int g = 0; g < idim; g++) {
         res[g] = static_cast<P>(0);
     }
 
-
-    for (p_n = 0; p_n < int_param.GetPMax(); p_n++) {
+    int p_n = 0;
+    for (p_n = 0; p_n < PMax; p_n++) {
         for (int j = 0; j < 3; j++) {
             d[j] = (b[j] - a[j]) / n;
         }
@@ -171,11 +156,13 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
         }
     }
 
-    if (p_n == int_param.GetPMax()) {
+    if (p_n == PMax) {
         for (int g = 0; g < idim; g++) {
             res[g] = res_prev[g];
         }
     }
+
+    ker_param.smoothR = start_rs;
 }
 }       // namespace bielcc
 #endif  // _INTEGRAL_UNIVERSAL_SEG_PNT_H_
