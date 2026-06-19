@@ -52,25 +52,9 @@ struct KernelParam {
     */
     KernelParam(KType k_, double smoothR_, double smoothRMin_):
                     smoothR(smoothR), k(k_), smoothRMin(smoothRMin_) {};
-    KernelParam(const KernelParam &obj);
+                    
+    KernelParam(const KernelParam &obj) = default;
     ~KernelParam() = default;
 };
-
-
-template<typename KType>
-KernelParam<KType>::KernelParam(const KernelParam& obj)
-{
-    smoothR = obj.smoothR;
-    k = obj.k;
-    for (int i = 0; i < 3; i++) {
-        n[i] = obj.n[i];
-        vec_cmplx[i] = obj.vec_cmplx[i];
-        vec_dbl[i] = obj.vec_dbl[i];
-        ort[i] = obj.ort[i];
-        e0[i] = obj.e0[i];
-        current[i] = obj.current[i];
-    }
-    freq = obj.freq;
-}
 }       // namespace bielcc
 #endif  // _KERNEL_PARAM_H_

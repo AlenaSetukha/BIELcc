@@ -27,9 +27,10 @@ constexpr static const int _PMAX_SMOOTH_SEG = 8;
 template <typename P, typename KType>
 void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        KernelParam<KType>& ker_param, const IntegralParam& int_param,
+        const KernelParam<KType>& ker_param_const, const IntegralParam& int_param,
         P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double d[3], y[3], dl, delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
@@ -85,8 +86,6 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
             res[g] = res_prev[g];
         }
     }
-
-    ker_param.smoothR = start_rs;
 }
 
 
@@ -103,9 +102,10 @@ void IntegralUniversalSegPnt(const double* a, const double* b, const double* x,
 template <typename P, typename KType>
 void IntegralUniversalSegPnt(const double* a, const double* b,
         void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                                    KernelParam<KType>& ker_param,
+                        const KernelParam<KType>& ker_param_const,
                            const IntegralParam& int_param, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double d[3], y[3], dl, delta = 0.;
     int n = int_param.GetNStart();
     int idim = int_param.GetIDim();
@@ -161,8 +161,6 @@ void IntegralUniversalSegPnt(const double* a, const double* b,
             res[g] = res_prev[g];
         }
     }
-
-    ker_param.smoothR = start_rs;
 }
 }       // namespace bielcc
 #endif  // _INTEGRAL_UNIVERSAL_SEG_PNT_H_

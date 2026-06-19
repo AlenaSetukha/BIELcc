@@ -29,8 +29,9 @@ constexpr static const int _PMAX_SMOOTH_DOUBLE_SURF = 8;
 template <size_t CellPoints, typename KType, typename P>
 void DoubleSurfIntegral(const double (&cellOut)[4][3], const double (&cellIn)[CellPoints][3],   
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        KernelParam<KType>& param, const IntegralParam& IP_cell, P* res)
+        const KernelParam<KType>& ker_param_const, const IntegralParam& IP_cell, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double p, q, p1, q1, s, a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
 
     int n = IP_cell.GetNStart();
@@ -79,7 +80,7 @@ void DoubleSurfIntegral(const double (&cellOut)[4][3], const double (&cellIn)[Ce
                 s = vec_length(rn);
 
                 // Расчет внутреннего интеграла
-                IntegralUniversalPnt(rc, cellIn, f_0, param, IP_cell, ff);
+                IntegralUniversalPnt(rc, cellIn, f_0, ker_param, IP_cell, ff);
 
                 for (int g = 0; g < idim; g++) {
                     res[g] += ff[g] * static_cast<P>(s);
@@ -112,7 +113,6 @@ void DoubleSurfIntegral(const double (&cellOut)[4][3], const double (&cellIn)[Ce
             res[g] = res_prev[g];
         }
     }
-    ker_param.smoothR = start_rs;
 }
 
 
@@ -135,8 +135,9 @@ void DoubleSurfIntegral(const double (&cellOut)[4][3], const double (&cellIn)[Ce
 template <size_t CellPoints, typename KType, typename P>
 void DoubleSurfIntegral(const double (&cellOut)[3][3], const double (&cellIn)[CellPoints][3],   
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        KernelParam<KType>& param, const IntegralParam& int_param, P* res)
+        const KernelParam<KType>& ker_param_const, const IntegralParam& int_param, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
     double p_vec[3], q_vec[3], r_vec[3];
     double delta = 0.;
@@ -172,7 +173,7 @@ void DoubleSurfIntegral(const double (&cellOut)[3][3], const double (&cellIn)[Ce
 
 
                 // Расчет внутреннего интеграла
-                IntegralUniversalPnt(rc, cellIn, f_0, param, int_param, ff);
+                IntegralUniversalPnt(rc, cellIn, f_0, ker_param, int_param, ff);
 
                 for (int g = 0; g < idim; g++) {
                     res[g] += ff[g];
@@ -219,7 +220,6 @@ void DoubleSurfIntegral(const double (&cellOut)[3][3], const double (&cellIn)[Ce
             res[g] = res_prev[g];
         }
     }
-    ker_param.smoothR = start_rs;
 }
 }           // namespace bielcc     
 #endif      // _DOUBLE_SURF_INTEGRAL_H_

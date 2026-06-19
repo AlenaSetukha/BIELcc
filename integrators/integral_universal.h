@@ -28,8 +28,9 @@ constexpr static const int _PMAX_SMOOTH = 8;
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        KernelParam<KType>& ker_param, const IntegralParam& int_param, P* res)
+        const KernelParam<KType>& ker_param_const, const IntegralParam& int_param, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double p, q, p1, q1, s, a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
     double delta = 0.;
     int n = int_param.GetNStart();
@@ -108,8 +109,6 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
             res[g] = res_prev[g];
         }
     }
-
-    ker_param.smoothR = start_rs;
 }
 
 
@@ -130,9 +129,10 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[4][3],
 template<typename P, typename KType>
 void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-        KernelParam<KType>& ker_param, const IntegralParam& int_param, 
+        const KernelParam<KType>& ker_param_const, const IntegralParam& int_param, 
         P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
     double p_vec[3], q_vec[3], r_vec[3];
     double delta = 0.;
@@ -212,7 +212,6 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
             res[g] = res_prev[g];
         }
     }
-    ker_param.smoothR = start_rs;
 }
 
 
@@ -239,9 +238,10 @@ void IntegralUniversalPnt(const double* x, const double (&cell)[3][3],
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[4][3],
             void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                                        KernelParam<KType>& ker_param,
+                            const KernelParam<KType>& ker_param_const,
                                const IntegralParam& int_param, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double p, q, p1, q1, s;
     double a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
     double delta = 0.;
@@ -321,8 +321,6 @@ void IntegralUniversal(const double (&cell)[4][3],
             res[g] = res_prev[g];
         }
     }
-    
-    ker_param.smoothR = start_rs;
 }
 
 
@@ -340,9 +338,10 @@ void IntegralUniversal(const double (&cell)[4][3],
 template<typename P, typename KType>
 void IntegralUniversal(const double (&cell)[3][3],
             void (*f_0)(const double*, const KernelParam<KType>&, P*),
-                                        KernelParam<KType>& ker_param,
+                            const KernelParam<KType>& ker_param_const,
                                const IntegralParam& int_param, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
     double p_vec[3], q_vec[3], r_vec[3];
     double delta = 0.;
@@ -422,8 +421,6 @@ void IntegralUniversal(const double (&cell)[3][3],
             res[g] = res_prev[g];
         }
     }
-
-    ker_param.smoothR = start_rs;
 }
 
 

@@ -30,9 +30,10 @@ template<size_t CellPoints, typename KType>
 std::complex<double>
 DoubleSurfIntegral_SimplePot_H_HS(const double (&cellOut)[4][3],
                           const double (&cellIn)[CellPoints][3],
-                  KernelParam<KType>& param, double analyticR_r,
-                                   const IntegralParam& IP_cell)
+                      const KernelParam<KType>& ker_param_const,
+               double analyticR_r, const IntegralParam& IP_cell)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double p, q, p1, q1, s;
     double a[3], b[3], a1[3], a2[3], a3[3], a4[3], m1[3], m2[3], rc[3], rn[3];
     double start_rs = ker_param.smoothR;
@@ -102,7 +103,6 @@ DoubleSurfIntegral_SimplePot_H_HS(const double (&cellOut)[4][3],
         res = res_prev;
     }
 
-    ker_param.smoothR = start_rs;
     return res;
 }
 
@@ -117,9 +117,10 @@ template<size_t CellPoints, typename KType>
 std::complex<double>
 DoubleSurfIntegral_SimplePot_H_HS(const double (&cellOut)[3][3],
                           const double (&cellIn)[CellPoints][3],
-                  KernelParam<KType>& ker_param, double analyticR_r,
-                                   const IntegralParam& IP_cell)
+                      const KernelParam<KType>& ker_param_const,
+               double analyticR_r, const IntegralParam& IP_cell)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double s, rc[3], A_jP[3], B_j[3], C_jP[3], A_jM[3], C_jM[3];
     double p_vec[3], q_vec[3], r_vec[3];
     double delta = 0.;
@@ -199,7 +200,6 @@ DoubleSurfIntegral_SimplePot_H_HS(const double (&cellOut)[3][3],
         res = res_prev;
     }
 
-    ker_param.smoothR = start_rs;
     return res;
 }
 

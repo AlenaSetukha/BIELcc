@@ -38,9 +38,11 @@ template <size_t CellPoints, typename KType, typename P>
 void DoubleSegmentCellIntegral(const double* a, const double* b,
                              const double (&cell)[CellPoints][3],
         void (*f_0)(const double*, const double*, const KernelParam<KType>&, P*),
-               KernelParam<KType>& ker_param, const IntegralParam& int_param_seg,
-                                     const IntegralParam& int_param_cell, P* res)
+                      const KernelParam<KType>& ker_param_const,
+                             const IntegralParam& int_param_seg,
+                    const IntegralParam& int_param_cell, P* res)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double d[3], xk[3], dl, delta = 0.;
     int n = int_param_seg.GetNStart();
     int idim = int_param_seg.GetIDim();
@@ -98,8 +100,6 @@ void DoubleSegmentCellIntegral(const double* a, const double* b,
             res[g] = res_prev[g];
         }
     }
-
-    ker_param.smoothR = start_rs;
 }
 
 }        // namespace bielcc

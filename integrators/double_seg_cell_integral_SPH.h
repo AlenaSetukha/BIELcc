@@ -37,10 +37,11 @@ template <size_t CellPoints, typename KType>
 std::complex<double>
 DoubleSegmentCellIntegral_SimplePot_H_HS(const double* a, const double* b,
                                       const double (&cell)[CellPoints][3],
-                        KernelParam<KType>& ker_param, double analyticR_r,
-                                       const IntegralParam& int_param_seg,
+                                const KernelParam<KType>& ker_param_const,
+                   double analyticR_r, const IntegralParam& int_param_seg,
                                       const IntegralParam& int_param_cell)
 {
+    KernelParam<KType> ker_param = ker_param_const;
     double d[3], xk[3], dl, delta = 0.;
     int n = int_param_seg.n_start;
     const int PMax = int_param_seg.GetPMax();
@@ -87,8 +88,7 @@ DoubleSegmentCellIntegral_SimplePot_H_HS(const double* a, const double* b,
     if (p_n == PMax) {
         res = res_prev;
     }
-
-    ker_param.smoothR = start_rs;
+    
     return res;
 }
 
